@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { Home, Users } from "lucide-react"
 import { getCookie } from "@/lib/utils"
@@ -36,9 +35,9 @@ export function Navigation() {
           console.log("meetingData", meetingData)
           navItem.name = "Meeting Prep Room"
           navItem.href = `/prep-room?meetingId=${meetingData[0].id}`
-          setNavigationItems([navItem, ...navigationItems])
         }
       }
+      setNavigationItems([navItem, ...navigationItems])
     }
     loadMeeting()
   }, [])
@@ -57,7 +56,7 @@ export function Navigation() {
               <span className="font-bold text-lg">Vercel</span>
             </Link>
 
-            <div className="hidden md:flex items-center justify-between w-full gap-6">
+            <div className={`hidden md:flex items-center ${navigationItems.length === 1 ? "justify-end" : "justify-between"} w-full gap-6`}>
               {navigationItems.map((item) => {
                 const Icon = item.icon
                 const isActive = pathname === item.href

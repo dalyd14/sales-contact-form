@@ -3,11 +3,7 @@ import { getDb } from "@/lib/db"
 
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const meetingId = Number.parseInt(params.id)
-
-    if (isNaN(meetingId)) {
-      return NextResponse.json({ error: "Invalid meeting ID" }, { status: 400 })
-    }
+    const meetingId = params.id
 
     const db = getDb();
     const result = await db.query(`

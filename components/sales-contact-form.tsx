@@ -3,7 +3,6 @@
 import type React from "react"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -12,11 +11,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { countries, productOptions } from "@/lib/countries"
 import { Loader2 } from "lucide-react"
-import { upsertCookie } from "@/lib/utils"
+import { CalendarBooking } from "./calendar-booking"
 
 export function SalesContactForm() {
-  const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [prospectId, setProspectId] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     email: "",
     country: "",
@@ -24,7 +23,42 @@ export function SalesContactForm() {
     message: "",
   })
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const [showBooking, setShowBooking] = useState(false)
+
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault()
+  //   setIsSubmitting(true)
+
+  //   try {
+  //     const response = await fetch("/api/prospects", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({
+  //         email: formData.email,
+  //         country: formData.country,
+  //         product_interest: formData.productInterest,
+  //         message: formData.message,
+  //       }),
+  //     })
+
+  //     if (response.ok) {
+  //       const { prospectId } = await response.json()
+  //       upsertCookie("prospectId", prospectId)
+  //       router.push(`/booking?prospectId=${prospectId}`)
+  //     } else {
+  //       throw new Error("Failed to submit form")
+  //     }
+  //   } catch (error) {
+  //     console.error("Error submitting form:", error)
+  //     // TODO: Add proper error handling/toast
+  //   } finally {
+  //     setIsSubmitting(false)
+  //   }
+  // }
+
+  const handleShowCalendar = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
 
@@ -44,8 +78,10 @@ export function SalesContactForm() {
 
       if (response.ok) {
         const { prospectId } = await response.json()
-        upsertCookie("prospectId", prospectId)
-        router.push(`/booking?prospectId=${prospectId}`)
+        setProspectId(prospectId)
+        setShowBooking(true)
+        // upsertCookie("prospectId", prospectId)
+        // router.push(`/booking?prospectId=${prospectId}`)
       } else {
         throw new Error("Failed to submit form")
       }
@@ -58,13 +94,17 @@ export function SalesContactForm() {
   }
 
   return (
+    <>
+    {(showBooking && prospectId) ? (
+      <CalendarBooking prospectId={prospectId} />
+    ) : (
     <Card>
       <CardHeader>
         <CardTitle>Contact Sales</CardTitle>
         <CardDescription>Tell us about your needs and we'll connect you with the right person</CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleShowCalendar} className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="email">Email Address</Label>
             <Input
@@ -140,6 +180,9 @@ export function SalesContactForm() {
           </Button>
         </form>
       </CardContent>
-    </Card>
+    </Card>      
+    )}
+    </>
+
   )
 }

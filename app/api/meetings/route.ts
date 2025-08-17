@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
         WHERE m.sales_rep_id = $1
         AND m.meeting_date >= NOW()
         ORDER BY m.meeting_date ASC
-      `, [Number.parseInt(salesRepId)])
+      `, [salesRepId])
     } else if (prospectId) {
         // Get most recent meeting for a given prospect id
         const db = getDb();
@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
           AND m.meeting_date >= NOW()
           ORDER BY m.meeting_date DESC
           LIMIT 1
-        `, [Number.parseInt(prospectId)])
+        `, [prospectId])
     } else {
       // Get all upcoming meetings
       const db = getDb();

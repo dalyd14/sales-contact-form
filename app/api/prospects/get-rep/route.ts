@@ -1,18 +1,13 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getDb } from "@/lib/db"
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest) {
   try {
-    const db = getDb();
-    // confirm that the prospect id is valid
-    const prospectId = params.id
-    
-    const prospectResult = await db.query(`SELECT id FROM prospects WHERE id = $1`, [prospectId])
-    if (prospectResult.rows.length === 0) {
-      return NextResponse.json({ error: "Invalid prospect ID" }, { status: 400 })
-    }
+    const body = await request.json()
+    const { prospectId } = body
 
     // Simple round-robin assignment - get the rep with the fewest meetings
+    const db = getDb();
     const result = await db.query(`
       SELECT sr.*, COUNT(m.id) as meeting_count
       FROM sales_reps sr
@@ -29,8 +24,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     const assignedRep = {
       id: result.rows[0].id,
       name: result.rows[0].name,
-      email: result.rows[0].email,
-      created_at: result.rows[0].created_at,
+      email: result.rows[0].email
     }
 
     return NextResponse.json(assignedRep)

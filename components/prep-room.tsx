@@ -4,10 +4,13 @@ import { useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Button } from "@mui/material"
 import { Separator } from "@/components/ui/separator"
 import { Calendar, Clock, User, CheckCircle, ExternalLink, FileText, Video, BookOpen, Zap } from "lucide-react"
+import { Chat, AutoAwesome } from "@mui/icons-material"
 import type { MeetingWithDetails } from "@/lib/db"
+import ChatComponent from "./chat"
+import { Dialog, DialogContent } from "@mui/material"
 
 interface PrepRoomResource {
   id: string
@@ -73,6 +76,7 @@ export function PrepRoom() {
   const meetingId = searchParams.get("meetingId")
   const [meeting, setMeeting] = useState<MeetingWithDetails | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [showChat, setShowChat] = useState(false)
 
   useEffect(() => {
     const loadMeeting = async () => {
@@ -188,6 +192,35 @@ export function PrepRoom() {
         </CardContent>
       </Card>
 
+      {/* Chat with Vercel AI Assistant Button */}
+      <div className="flex justify-center">
+        <Button
+        variant="contained" 
+        color="primary" 
+        sx={{
+          width: "30%",
+          height: "75px",
+          backgroundColor: "black",
+          color: "white",
+          fontSize: "1rem"
+        }}
+        startIcon={<AutoAwesome />}
+        onClick={() => setShowChat(true)}>
+          Chat with Vercel AI Assistant
+        </Button>
+      </div>
+
+      {/* Chat Modal */}
+      <Dialog PaperProps={{
+        sx: {
+          borderRadius: "10px"
+        }
+      }} fullWidth={true} maxWidth="lg" open={showChat} onClose={() => setShowChat(false)}>
+        <DialogContent sx={{ padding: 0, borderRadius: "10px" }}>
+          <ChatComponent meetingId={meetingId} />
+        </DialogContent>
+      </Dialog>
+
       {/* Preparation Resources */}
       <div>
         <div className="mb-6">
@@ -215,7 +248,7 @@ export function PrepRoom() {
                 <CardDescription>{resource.description}</CardDescription>
               </CardHeader>
               <CardContent className="pt-0">
-                <Button variant="outline" size="sm" className="w-full bg-transparent" asChild>
+                <Button variant="contained" color="primary" sx={{ width: "100%" }}>
                   <a href={resource.url} target="_blank" rel="noopener noreferrer">
                     <span>Explore</span>
                     <ExternalLink className="ml-2 h-3 w-3" />
@@ -226,62 +259,6 @@ export function PrepRoom() {
           ))}
         </div>
       </div>
-
-      <Separator />
-
-      {/* Next Steps */}
-      <Card>
-        <CardHeader>
-          <CardTitle>What to Expect</CardTitle>
-          <CardDescription>Here's what will happen during your meeting</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex gap-3">
-              <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-semibold">
-                1
-              </div>
-              <div>
-                <p className="font-semibold">Discovery & Requirements</p>
-                <p className="text-sm text-muted-foreground">We'll discuss your current setup, challenges, and goals</p>
-              </div>
-            </div>
-            <div className="flex gap-3">
-              <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-semibold">
-                2
-              </div>
-              <div>
-                <p className="font-semibold">Product Demo</p>
-                <p className="text-sm text-muted-foreground">See how Vercel can solve your specific use cases</p>
-              </div>
-            </div>
-            <div className="flex gap-3">
-              <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-semibold">
-                3
-              </div>
-              <div>
-                <p className="font-semibold">Next Steps</p>
-                <p className="text-sm text-muted-foreground">We'll outline a plan to get you started with Vercel</p>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Contact Info */}
-      <Card className="bg-muted/50">
-        <CardContent className="pt-6">
-          <div className="text-center">
-            <p className="text-sm text-muted-foreground mb-2">Questions before your meeting?</p>
-            <p className="text-sm">
-              Reach out to your sales expert:{" "}
-              <a href={`mailto:${meeting.sales_rep_email}`} className="text-primary hover:underline font-semibold">
-                {meeting.sales_rep_email}
-              </a>
-            </p>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   )
 }

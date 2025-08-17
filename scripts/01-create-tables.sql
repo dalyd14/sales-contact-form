@@ -1,7 +1,8 @@
 -- Drop tables if they exist
-DROP TABLE IF EXISTS meetings;
-DROP TABLE IF EXISTS prospects;
-DROP TABLE IF EXISTS sales_reps;
+DROP TABLE IF EXISTS meetings CASCADE;
+DROP TABLE IF EXISTS prospects CASCADE;
+DROP TABLE IF EXISTS sales_reps CASCADE;
+DROP TABLE IF EXISTS meeting_ai_chat CASCADE;
 
 -- Create prospects table to store contact form submissions
 CREATE TABLE IF NOT EXISTS prospects (
@@ -30,6 +31,14 @@ CREATE TABLE IF NOT EXISTS meetings (
   meeting_date TIMESTAMP WITH TIME ZONE NOT NULL,
   status VARCHAR(50) DEFAULT 'scheduled' CHECK (status IN ('scheduled', 'completed', 'cancelled', 'no_show')),
   notes TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS meeting_ai_chat (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  meeting_id UUID UNIQUE NOT NULL REFERENCES meetings(id) ON DELETE CASCADE,
+  messages JSONB NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

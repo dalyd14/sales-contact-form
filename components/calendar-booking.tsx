@@ -7,16 +7,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Calendar } from "@/components/ui/calendar"
 import { Loader2, Clock, User } from "lucide-react"
 import type { SalesRep } from "@/lib/db"
+import { upsertCookie } from "@/lib/utils"
 
 interface TimeSlot {
   time: string
   available: boolean
 }
 
-export function CalendarBooking() {
+export function CalendarBooking({ prospectId }: { prospectId: string }) {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const prospectId = searchParams.get("prospectId")
 
   const [selectedDate, setSelectedDate] = useState<Date>()
   const [selectedTime, setSelectedTime] = useState<string>("")
@@ -78,13 +77,14 @@ export function CalendarBooking() {
       const [hours, minutes] = selectedTime.split(":").map(Number)
       meetingDateTime.setHours(hours, minutes, 0, 0)
 
+      // Create meeting with prospect id and sales rep id and meeting date
       const response = await fetch("/api/meetings", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          prospectId: Number.parseInt(prospectId),
+          prospectId: prospectId,
           salesRepId: assignedRep.id,
           meetingDate: meetingDateTime.toISOString(),
         }),
@@ -92,6 +92,7 @@ export function CalendarBooking() {
 
       if (response.ok) {
         const { meetingId } = await response.json()
+        upsertCookie("prospectId", prospectId)
         router.push(`/prep-room?meetingId=${meetingId}`)
       } else {
         throw new Error("Failed to book meeting")
