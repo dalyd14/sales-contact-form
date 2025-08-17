@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { countries, productOptions } from "@/lib/countries"
 import { Loader2 } from "lucide-react"
+import { upsertCookie } from "@/lib/utils"
 
 export function SalesContactForm() {
   const router = useRouter()
@@ -43,6 +44,7 @@ export function SalesContactForm() {
 
       if (response.ok) {
         const { prospectId } = await response.json()
+        upsertCookie("prospectId", prospectId)
         router.push(`/booking?prospectId=${prospectId}`)
       } else {
         throw new Error("Failed to submit form")

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -16,6 +17,7 @@ import {
 } from "@/components/ui/dialog"
 import { Calendar, Clock, User, Mail, Globe, MessageSquare, Users, CalendarDays, TrendingUp } from "lucide-react"
 import type { SalesRep } from "@/lib/db"
+import { getCookie, upsertCookie } from "@/lib/utils"
 
 interface MeetingWithDetails {
   id: number
@@ -42,9 +44,11 @@ interface DashboardStats {
 }
 
 export function AdminDashboard() {
+  const searchParams = useSearchParams()
+  const salesRepId = searchParams.get("sales_rep")
   const [meetings, setMeetings] = useState<MeetingWithDetails[]>([])
   const [salesReps, setSalesReps] = useState<SalesRep[]>([])
-  const [selectedRep, setSelectedRep] = useState<string>("all")
+  const [selectedRep, setSelectedRep] = useState<string>(salesRepId || getCookie("salesRepId") || "all")
   const [stats, setStats] = useState<DashboardStats>({
     totalMeetings: 0,
     upcomingMeetings: 0,
@@ -57,6 +61,7 @@ export function AdminDashboard() {
   useEffect(() => {
     const loadData = async () => {
       setIsLoading(true)
+      upsertCookie("salesRepId", selectedRep)
       try {
         // Load sales reps
         const repsResponse = await fetch("/api/sales-reps")
@@ -74,7 +79,7 @@ export function AdminDashboard() {
         }
 
         // Load stats
-        const statsResponse = await fetch("/api/admin/stats")
+        const statsResponse = await fetch(selectedRep === "all" ? "/api/admin/stats" : `/api/admin/stats?salesRepId=${selectedRep}`)
         if (statsResponse.ok) {
           const statsData = await statsResponse.json()
           setStats(statsData)

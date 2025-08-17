@@ -55,3 +55,43 @@ export function getDb(): Queryable {
 
   return db;
 }
+
+
+// Database types
+export interface Prospect {
+  id: number
+  email: string
+  country: string
+  product_interest: "vercel" | "v0" | "vercel_and_v0"
+  message?: string
+  created_at: string
+  updated_at: string
+}
+
+export interface SalesRep {
+  id: number
+  name: string
+  email: string
+  created_at: string
+}
+
+export interface Meeting {
+  id: number
+  prospect_id: number
+  sales_rep_id: number
+  meeting_date: string
+  status: "scheduled" | "completed" | "cancelled" | "no_show"
+  notes?: string
+  created_at: string
+  updated_at: string
+}
+
+// Extended types for joins
+export interface MeetingWithDetails extends Meeting {
+  prospect_email: string
+  prospect_country: string
+  product_interest: "vercel" | "v0" | "vercel_and_v0"
+  prospect_message?: string
+  sales_rep_name: string
+  sales_rep_email: string
+}

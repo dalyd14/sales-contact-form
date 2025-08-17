@@ -32,6 +32,7 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const salesRepId = searchParams.get("salesRepId")
+    const prospectId = searchParams.get("prospectId")
 
     let query
     if (salesRepId) {
@@ -53,6 +54,26 @@ export async function GET(request: NextRequest) {
         AND m.meeting_date >= NOW()
         ORDER BY m.meeting_date ASC
       `, [Number.parseInt(salesRepId)])
+    } else if (prospectId) {
+        // Get most recent meeting for a given prospect id
+        const db = getDb();
+        query = await db.query(`
+          SELECT 
+            m.*,
+            p.email as prospect_email,
+            p.country as prospect_country,
+            p.product_interest,
+            p.message as prospect_message,
+            sr.name as sales_rep_name,
+            sr.email as sales_rep_email
+          FROM meetings m
+          JOIN prospects p ON m.prospect_id = p.id
+          JOIN sales_reps sr ON m.sales_rep_id = sr.id
+          WHERE m.prospect_id = $1
+          AND m.meeting_date >= NOW()
+          ORDER BY m.meeting_date DESC
+          LIMIT 1
+        `, [Number.parseInt(prospectId)])
     } else {
       // Get all upcoming meetings
       const db = getDb();
