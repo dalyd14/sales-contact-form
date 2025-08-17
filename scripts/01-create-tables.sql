@@ -1,6 +1,11 @@
+-- Drop tables if they exist
+DROP TABLE IF EXISTS meetings;
+DROP TABLE IF EXISTS prospects;
+DROP TABLE IF EXISTS sales_reps;
+
 -- Create prospects table to store contact form submissions
 CREATE TABLE IF NOT EXISTS prospects (
-  id SERIAL PRIMARY KEY,
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   email VARCHAR(255) NOT NULL UNIQUE,
   country VARCHAR(100) NOT NULL,
   product_interest VARCHAR(50) NOT NULL CHECK (product_interest IN ('vercel', 'v0', 'vercel_and_v0')),
@@ -11,7 +16,7 @@ CREATE TABLE IF NOT EXISTS prospects (
 
 -- Create sales_reps table for account executives
 CREATE TABLE IF NOT EXISTS sales_reps (
-  id SERIAL PRIMARY KEY,
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
   email VARCHAR(255) NOT NULL UNIQUE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -19,9 +24,9 @@ CREATE TABLE IF NOT EXISTS sales_reps (
 
 -- Create meetings table to store scheduled meetings
 CREATE TABLE IF NOT EXISTS meetings (
-  id SERIAL PRIMARY KEY,
-  prospect_id INTEGER NOT NULL REFERENCES prospects(id) ON DELETE CASCADE,
-  sales_rep_id INTEGER NOT NULL REFERENCES sales_reps(id) ON DELETE CASCADE,
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  prospect_id UUID NOT NULL REFERENCES prospects(id) ON DELETE CASCADE,
+  sales_rep_id UUID NOT NULL REFERENCES sales_reps(id) ON DELETE CASCADE,
   meeting_date TIMESTAMP WITH TIME ZONE NOT NULL,
   status VARCHAR(50) DEFAULT 'scheduled' CHECK (status IN ('scheduled', 'completed', 'cancelled', 'no_show')),
   notes TEXT,
