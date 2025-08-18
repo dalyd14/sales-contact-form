@@ -93,5 +93,7 @@ export interface MeetingWithDetails extends Meeting {
   product_interest: "vercel" | "v0" | "vercel_and_v0"
   prospect_message?: string
   sales_rep_name: string
-  sales_rep_email: string
+  sales_rep_email: string,
+  ai_resources: string[]
+  resources_completed: string[]
 }

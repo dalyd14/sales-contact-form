@@ -14,6 +14,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         p.country as prospect_country,
         p.product_interest,
         p.message as prospect_message,
+        p.ai_resources,
+        p.resources_completed,
         sr.name as sales_rep_name,
         sr.email as sales_rep_email
       FROM meetings m
@@ -32,7 +34,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       sales_rep_id: result.rows[0].sales_rep_id,
       meeting_date: result.rows[0].meeting_date,
       status: result.rows[0].status,
-      notes: result.rows[0].notes,
+      ai_resources: result.rows[0].ai_resources,
+      resources_completed: result.rows[0].resources_completed,
       created_at: result.rows[0].created_at,
       updated_at: result.rows[0].updated_at,
       prospect_email: result.rows[0].prospect_email,

@@ -7,67 +7,23 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@mui/material"
 import { Separator } from "@/components/ui/separator"
 import { Calendar, Clock, User, CheckCircle, ExternalLink, FileText, Video, BookOpen, Zap } from "lucide-react"
-import { Chat, AutoAwesome } from "@mui/icons-material"
+import { Chat, AutoAwesome, AutoFixHigh, Article, HistoryEdu } from "@mui/icons-material"
 import type { MeetingWithDetails } from "@/lib/db"
 import ChatComponent from "./chat"
 import { Dialog, DialogContent } from "@mui/material"
 
-interface PrepRoomResource {
-  id: string
-  title: string
-  description: string
-  type: "video" | "article" | "guide" | "demo"
-  url: string
-  duration?: string
-}
-
-const prepResources: PrepRoomResource[] = [
-  {
-    id: "1",
-    title: "Vercel Platform Overview",
-    description: "Learn about Vercel's deployment platform and core features",
-    type: "video",
-    url: "https://vercel.com/docs",
-    duration: "5 min",
-  },
-  {
-    id: "2",
-    title: "Getting Started with v0",
-    description: "Discover how v0 can accelerate your development workflow",
-    type: "demo",
-    url: "https://v0.dev",
-    duration: "3 min",
-  },
-  {
-    id: "3",
-    title: "Enterprise Success Stories",
-    description: "See how companies scale with Vercel",
-    type: "article",
-    url: "https://vercel.com/customers",
-    duration: "7 min",
-  },
-  {
-    id: "4",
-    title: "Deployment Best Practices",
-    description: "Optimize your deployment workflow",
-    type: "guide",
-    url: "https://vercel.com/docs/deployments",
-    duration: "10 min",
-  },
-]
+import resources from "@/lib/resources.json"
 
 const getResourceIcon = (type: string) => {
   switch (type) {
-    case "video":
-      return <Video className="h-4 w-4" />
-    case "article":
-      return <FileText className="h-4 w-4" />
-    case "guide":
-      return <BookOpen className="h-4 w-4" />
-    case "demo":
-      return <Zap className="h-4 w-4" />
+    case "blog":
+      return <HistoryEdu className="h-4 w-4" />
+    case "documentation":
+      return <Article className="h-4 w-4" />
+    case "prompt":
+      return <AutoFixHigh className="h-4 w-4" />
     default:
-      return <FileText className="h-4 w-4" />
+      return <Article className="h-4 w-4" />
   }
 }
 
@@ -224,39 +180,34 @@ export function PrepRoom() {
       {/* Preparation Resources */}
       <div>
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-foreground mb-2">Prepare for Your Meeting</h2>
-          <p className="text-muted-foreground">
-            Explore these resources to get the most out of your conversation with our sales team.
-          </p>
+          <h2 className="text-2xl font-bold text-foreground mb-2">We think you might like these...</h2>
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
-          {prepResources.map((resource) => (
-            <Card key={resource.id} className="hover:shadow-md transition-shadow">
+          {meeting && meeting.ai_resources && meeting.ai_resources.map((resource: string) => {
+            const resourceData = resources.find((r: any) => r.id === resource)
+            return(
+            <Card key={resource} className="hover:shadow-md transition-shadow">
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-2">
-                    {getResourceIcon(resource.type)}
-                    <CardTitle className="text-lg">{resource.title}</CardTitle>
+                    {getResourceIcon(resourceData?.type || "")}
+                    <CardTitle className="text-lg">{resourceData?.name || ""}</CardTitle>
                   </div>
-                  {resource.duration && (
-                    <Badge variant="outline" className="text-xs">
-                      {resource.duration}
-                    </Badge>
-                  )}
                 </div>
-                <CardDescription>{resource.description}</CardDescription>
+                <CardDescription>{resourceData?.description || ""}</CardDescription>
               </CardHeader>
               <CardContent className="pt-0">
                 <Button variant="contained" color="primary" sx={{ width: "100%" }}>
-                  <a href={resource.url} target="_blank" rel="noopener noreferrer">
+                  <a href={resourceData?.url || ""} target="_blank" rel="noopener noreferrer">
                     <span>Explore</span>
                     <ExternalLink className="ml-2 h-3 w-3" />
                   </a>
                 </Button>
               </CardContent>
             </Card>
-          ))}
+            )
+          })}
         </div>
       </div>
     </div>

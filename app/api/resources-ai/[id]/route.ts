@@ -1,17 +1,18 @@
-import { groq } from "@ai-sdk/groq";
-import { generateObject } from 'ai';
-import { readFileSync } from 'fs';
-import { join } from 'path';
-import z from "zod";
-import { getDb } from "../../../../lib/db";
 import { NextResponse } from "next/server";
+import { generateObject } from 'ai';
+import { groq } from "@ai-sdk/groq";
+import z from "zod";
 
-const resources = JSON.parse(readFileSync(join(process.cwd(), '../../../../', 'lib', 'resources.json'), 'utf-8'));
+import { getDb } from "@/lib/db";
+import resources from "@/lib/resources.json"
 
-export async function POST(request: Request) {
+export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
+    const prospectId = id;
+
     const db = getDb()
     
-    const { prospectId, enrichedData, formSubmission }: { prospectId: string, enrichedData: any, formSubmission: any } = await request.json()
+    const { enrichedData, formSubmission }: { enrichedData: any, formSubmission: any } = await request.json()
 
     const result = await generateResources(formSubmission, enrichedData)
 
@@ -61,334 +62,225 @@ const generateResources = async (formSubmission: any, enrichedData: any) => {
     return object;
 }
 
-generateResources({
-    "email": "john.doe@allbirds.com",
-    "country": "United States",
-    "productInterest": "vercel",
-    "message": "I'm interested in learning more about Vercel's platform."
-}, {
-    "data": {
-      "domain": "allbirds.com",
-      "disposable": false,
-      "webmail": false,
-      "accept_all": false,
-      "pattern": "{first}.{last}",
-      "organization": "Allbirds",
-      "description": "Allbirds is a footwear company that focuses on sustainable and comfortable shoes made from natural materials.",
-      "industry": "Retail Apparel and Fashion",
-      "twitter": null,
-      "facebook": null,
-      "linkedin": "https://linkedin.com/company/allbirds",
-      "instagram": null,
-      "youtube": null,
-      "technologies": [
-        "cloudflare",
-        "dynamic-yield",
-        "google-tag-manager",
-        "hsts",
-        "http-3",
-        "onetrust",
-        "shopify",
-        "track-js"
-      ],
-      "country": "US",
-      "state": "CA",
-      "city": "San Francisco",
-      "postal_code": null,
-      "street": null,
-      "headcount": "201-500",
-      "company_type": "public company",
-      "emails": [
-        {
-          "value": "kimmy.kline@allbirds.com",
-          "type": "personal",
-          "confidence": 99,
-          "sources": [
-            {
-              "domain": "linkedin.com",
-              "uri": "https://www.google.com/search?q=site:linkedin.com%20kimmy%20kline%20allbirds",
-              "extracted_on": "2025-08-09",
-              "last_seen_on": "2025-08-08",
-              "still_on_page": true
-            }
-          ],
-          "first_name": "Kimmy",
-          "last_name": "Kline",
-          "position": "Director of Retail Planning",
-          "position_raw": "Director of Retail Planning",
-          "seniority": "executive",
-          "department": "management",
-          "linkedin": "https://www.linkedin.com/in/kimmy-kline-56479648",
-          "twitter": null,
-          "phone_number": null,
-          "verification": {
-            "date": "2025-08-01",
-            "status": "valid"
-          }
-        },
-        {
-          "value": "james@allbirds.com",
-          "type": "personal",
-          "confidence": 99,
-          "sources": [
-            {
-              "domain": "linkedin.com",
-              "uri": "https://www.google.com/search?q=site:linkedin.com%20james%20romero%20allbirds",
-              "extracted_on": "2025-01-03",
-              "last_seen_on": "2025-08-01",
-              "still_on_page": true
-            }
-          ],
-          "first_name": "James",
-          "last_name": "Romero",
-          "position": "Senior Director of Product Management",
-          "position_raw": "Senior Director of Product Creation",
-          "seniority": "executive",
-          "department": "management",
-          "linkedin": "https://www.linkedin.com/in/jamesmromero",
-          "twitter": null,
-          "phone_number": null,
-          "verification": {
-            "date": "2025-06-24",
-            "status": "valid"
-          }
-        },
-        {
-          "value": "kris.wolfram@allbirds.com",
-          "type": "personal",
-          "confidence": 99,
-          "sources": [
-            {
-              "domain": "linkedin.com",
-              "uri": "https://www.google.com/search?q=site:linkedin.com%20kris%20wolfram%20allbirds",
-              "extracted_on": "2025-01-03",
-              "last_seen_on": "2025-07-05",
-              "still_on_page": true
-            }
-          ],
-          "first_name": "Kris",
-          "last_name": "Wolfram",
-          "position": "Senior Manager, HR Business Partner",
-          "position_raw": "Sr. Manager, People Business Partner",
-          "seniority": "senior",
-          "department": "sales",
-          "linkedin": "https://www.linkedin.com/in/kris-wolfram-96a22625",
-          "twitter": null,
-          "phone_number": null,
-          "verification": {
-            "date": "2025-07-10",
-            "status": "valid"
-          }
-        },
-        {
-          "value": "kevin.stolle@allbirds.com",
-          "type": "personal",
-          "confidence": 99,
-          "sources": [
-            {
-              "domain": "linkedin.com",
-              "uri": "https://www.google.com/search?q=site:linkedin.com%20kevin%20stolle%20allbirds",
-              "extracted_on": "2025-01-03",
-              "last_seen_on": "2025-08-12",
-              "still_on_page": true
-            }
-          ],
-          "first_name": "Kevin",
-          "last_name": "Stolle",
-          "position": "Director of Financial Planning and Analysis",
-          "position_raw": "Director, FP&A and Strategic Finance",
-          "seniority": "executive",
-          "department": "finance",
-          "linkedin": "https://www.linkedin.com/in/kevinstolle",
-          "twitter": null,
-          "phone_number": null,
-          "verification": {
-            "date": "2025-05-21",
-            "status": "valid"
-          }
-        },
-        {
-          "value": "chris.peters@allbirds.com",
-          "type": "personal",
-          "confidence": 99,
-          "sources": [
-            {
-              "domain": "linkedin.com",
-              "uri": "https://www.google.com/search?q=site:linkedin.com%20chris%20peters%20allbirds",
-              "extracted_on": "2025-01-03",
-              "last_seen_on": "2025-01-03",
-              "still_on_page": true
-            }
-          ],
-          "first_name": "Chris",
-          "last_name": "Peters",
-          "position": "Director of Product Management",
-          "position_raw": "Director of Product Management",
-          "seniority": "executive",
-          "department": "management",
-          "linkedin": "https://www.linkedin.com/in/peters5395",
-          "twitter": null,
-          "phone_number": null,
-          "verification": {
-            "date": "2025-06-21",
-            "status": "valid"
-          }
-        },
-        {
-          "value": "charisse.carroll@allbirds.com",
-          "type": "personal",
-          "confidence": 99,
-          "sources": [
-            {
-              "domain": "linkedin.com",
-              "uri": "https://www.google.com/search?q=site:linkedin.com%20charisse%20carroll%20allbirds",
-              "extracted_on": "2025-01-03",
-              "last_seen_on": "2025-08-03",
-              "still_on_page": true
-            }
-          ],
-          "first_name": "Charisse",
-          "last_name": "Carroll",
-          "position": "Director of Human Resources",
-          "position_raw": "Director, People Success & Talent at Allbirds",
-          "seniority": "executive",
-          "department": "hr",
-          "linkedin": "https://www.linkedin.com/in/charisse-carroll-0808a03",
-          "twitter": null,
-          "phone_number": null,
-          "verification": {
-            "date": "2025-07-09",
-            "status": "valid"
-          }
-        },
-        {
-          "value": "claire.linville@allbirds.com",
-          "type": "personal",
-          "confidence": 99,
-          "sources": [
-            {
-              "domain": "linkedin.com",
-              "uri": "https://www.google.com/search?q=site:linkedin.com%20claire%20linville%20allbirds",
-              "extracted_on": "2025-01-03",
-              "last_seen_on": "2025-08-05",
-              "still_on_page": true
-            }
-          ],
-          "first_name": "Claire",
-          "last_name": "Linville",
-          "position": "Director of Strategy",
-          "position_raw": "Director II, Strategy",
-          "seniority": "executive",
-          "department": "management",
-          "linkedin": "https://www.linkedin.com/in/claire-linville-8968803b",
-          "twitter": null,
-          "phone_number": null,
-          "verification": {
-            "date": "2025-08-14",
-            "status": "valid"
-          }
-        },
-        {
-          "value": "travis@allbirds.com",
-          "type": "personal",
-          "confidence": 99,
-          "sources": [
-            {
-              "domain": "linkedin.com",
-              "uri": "https://www.google.com/search?q=site:linkedin.com%20travis%20boyce%20allbirds",
-              "extracted_on": "2025-01-08",
-              "last_seen_on": "2025-07-04",
-              "still_on_page": true
-            },
-            {
-              "domain": "vitag.com.au",
-              "uri": "https://vitag.com.au/the-future-of-retail-pulled-forward",
-              "extracted_on": "2024-06-13",
-              "last_seen_on": "2024-06-13",
-              "still_on_page": true
-            }
-          ],
-          "first_name": "Travis",
-          "last_name": "Boyce",
-          "position": "Vice President, Business Development",
-          "position_raw": "Vice President, Business Development",
-          "seniority": "executive",
-          "department": "sales",
-          "linkedin": "https://www.linkedin.com/in/travis-boyce-1b090225",
-          "twitter": null,
-          "phone_number": null,
-          "verification": {
-            "date": "2025-07-31",
-            "status": "valid"
-          }
-        },
-        {
-          "value": "laura.mallers@allbirds.com",
-          "type": "personal",
-          "confidence": 98,
-          "sources": [
-            {
-              "domain": "linkedin.com",
-              "uri": "https://www.google.com/search?q=site:linkedin.com%20laura%20mallers%20allbirds",
-              "extracted_on": "2025-01-08",
-              "last_seen_on": "2025-08-14",
-              "still_on_page": true
-            }
-          ],
-          "first_name": "Laura",
-          "last_name": "Mallers",
-          "position": "Senior Director of Reporting and Controls",
-          "position_raw": "Senior Director, External Reporting & Internal Controls",
-          "seniority": "executive",
-          "department": "management",
-          "linkedin": "https://www.linkedin.com/in/laura-mallers-b4287b45",
-          "twitter": null,
-          "phone_number": null,
-          "verification": {
-            "date": "2025-05-24",
-            "status": "valid"
-          }
-        },
-        {
-          "value": "erin.sander@allbirds.com",
-          "type": "personal",
-          "confidence": 98,
-          "sources": [
-            {
-              "domain": "linkedin.com",
-              "uri": "https://www.google.com/search?q=site:linkedin.com%20erin%20sander%20allbirds",
-              "extracted_on": "2025-01-08",
-              "last_seen_on": "2025-07-29",
-              "still_on_page": true
-            }
-          ],
-          "first_name": "Erin",
-          "last_name": "Sander",
-          "position": "Vice President of Product Management",
-          "position_raw": "Vice President Product & Merchandising",
-          "seniority": "executive",
-          "department": "management",
-          "linkedin": "https://www.linkedin.com/in/erin-sander-56029b4",
-          "twitter": null,
-          "phone_number": null,
-          "verification": {
-            "date": "2025-06-17",
-            "status": "valid"
-          }
-        }
-      ],
-      "linked_domains": []
-    },
-    "meta": {
-      "results": 86,
-      "limit": 10,
-      "offset": 0,
-      "params": {
-        "domain": "allbirds.com",
-        "company": null,
-        "type": null,
-        "seniority": null,
-        "department": null
-      }
-    }
-  })
+// generateResources({
+//     "email": "john.doe@allbirds.com",
+//     "country": "United States",
+//     "productInterest": "vercel",
+//     "message": "I'm interested in learning more about Vercel's platform."
+// }, {
+//     "person": {
+//       "id": "3631883d-9cb4-52ce-a10e-16f0311a17a0",
+//       "name": {
+//         "fullName": "Chris Peters",
+//         "givenName": "Chris",
+//         "familyName": "Peters"
+//       },
+//       "email": "chris.peters@allbirds.com",
+//       "location": "Greater Chicago Area",
+//       "timeZone": null,
+//       "utcOffset": null,
+//       "geo": {
+//         "city": null,
+//         "state": null,
+//         "stateCode": null,
+//         "country": "United States",
+//         "countryCode": "US",
+//         "lat": null,
+//         "lng": null
+//       },
+//       "bio": null,
+//       "site": null,
+//       "avatar": null,
+//       "employment": {
+//         "domain": "allbirds.com",
+//         "name": "Allbirds",
+//         "title": "Director of Product Management",
+//         "role": "management",
+//         "subRole": null,
+//         "seniority": "executive"
+//       },
+//       "facebook": {
+//         "handle": null
+//       },
+//       "github": {
+//         "handle": null,
+//         "id": null,
+//         "avatar": null,
+//         "company": null,
+//         "blog": null,
+//         "followers": null,
+//         "following": null
+//       },
+//       "twitter": {
+//         "handle": null,
+//         "id": null,
+//         "bio": null,
+//         "followers": null,
+//         "following": null,
+//         "statuses": null,
+//         "favorites": null,
+//         "location": null,
+//         "site": null,
+//         "avatar": null
+//       },
+//       "linkedin": {
+//         "handle": "peters5395"
+//       },
+//       "googleplus": {
+//         "handle": null
+//       },
+//       "gravatar": {
+//         "handle": null,
+//         "urls": [],
+//         "avatar": null,
+//         "avatars": []
+//       },
+//       "fuzzy": false,
+//       "emailProvider": "google.com",
+//       "indexedAt": "2025-01-03",
+//       "phone": null,
+//       "activeAt": "2025-06-21",
+//       "inactiveAt": null
+//     },
+//     "company": {
+//       "id": "8c14e6f1-08e8-5f9d-bfdd-96bec5a40d3a",
+//       "name": "Allbirds",
+//       "legalName": "Allbirds",
+//       "domain": "allbirds.com",
+//       "domainAliases": [],
+//       "site": {
+//         "phoneNumbers": [
+//           "+1 888 963 8944"
+//         ],
+//         "emailAddresses": [
+//           "bulkorders@allbirds.com",
+//           "press@allbirds.com",
+//           "help@allbirds.com",
+//           "together@allbirds.com",
+//           "info_impressum@allbirds.com",
+//           "support@allbirds.com",
+//           "sustainability@allbirds.com",
+//           "first@allbirds.com",
+//           "hello@allbirds.com",
+//           "info@allbirds.com",
+//           "legal@allbirds.com",
+//           "joinus-jp@allbirds.com",
+//           "loungers@allbirds.com"
+//         ]
+//       },
+//       "category": {
+//         "sector": null,
+//         "industryGroup": null,
+//         "industry": null,
+//         "subIndustry": null,
+//         "gicsCode": "25504010",
+//         "sicCode": "56",
+//         "sic4Codes": [
+//           "56"
+//         ],
+//         "naicsCode": "44",
+//         "naics6Codes": [
+//           "448110"
+//         ],
+//         "naics6Codes2022": [
+//           "458110"
+//         ]
+//       },
+//       "tags": [
+//         "footwear",
+//         "fashion",
+//         "sustainability",
+//         "retail",
+//         "e-commerce"
+//       ],
+//       "description": "Allbirds is a footwear company that focuses on sustainable and comfortable shoes made from natural materials.",
+//       "foundedYear": 2016,
+//       "location": "San Francisco, California, United States",
+//       "timeZone": "America/Los_Angeles",
+//       "utcOffset": -8,
+//       "geo": {
+//         "streetNumber": null,
+//         "streetName": null,
+//         "subPremise": null,
+//         "streetAddress": null,
+//         "city": "San Francisco",
+//         "postalCode": null,
+//         "state": "California",
+//         "stateCode": "CA",
+//         "country": "United States",
+//         "countryCode": "US",
+//         "lat": 37.77493,
+//         "lng": -122.41942
+//       },
+//       "logo": "https://logo.clearbit.com/allbirds.com",
+//       "facebook": {
+//         "handle": null,
+//         "likes": null
+//       },
+//       "linkedin": {
+//         "handle": "company/allbirds"
+//       },
+//       "twitter": {
+//         "handle": null,
+//         "id": null,
+//         "bio": null,
+//         "followers": null,
+//         "following": null,
+//         "location": null,
+//         "site": null,
+//         "avatar": null
+//       },
+//       "crunchbase": {
+//         "handle": null
+//       },
+//       "youtube": {
+//         "handle": null
+//       },
+//       "emailProvider": "google.com",
+//       "type": "public",
+//       "ticker": "BIRD",
+//       "identifiers": {
+//         "usEIN": null
+//       },
+//       "phone": "+1 888 963 8944",
+//       "metrics": {
+//         "alexaUsRank": null,
+//         "alexaGlobalRank": null,
+//         "trafficRank": "very_high",
+//         "employees": "251-1K",
+//         "marketCap": null,
+//         "raised": null,
+//         "annualRevenue": null,
+//         "estimatedAnnualRevenue": null,
+//         "fiscalYearEnd": null
+//       },
+//       "indexedAt": "2025-09-18",
+//       "tech": [
+//         "cloudflare",
+//         "dynamic-yield",
+//         "google-tag-manager",
+//         "hsts",
+//         "http-3",
+//         "onetrust",
+//         "shopify",
+//         "track-js"
+//       ],
+//       "techCategories": [
+//         "conversion_optimization",
+//         "data_management",
+//         "dns",
+//         "ecommerce",
+//         "monitoring",
+//         "security",
+//         "tag_management",
+//         "web_servers"
+//       ],
+//       "fundingRounds": [],
+//       "parent": {
+//         "domain": null
+//       },
+//       "ultimateParent": {
+//         "domain": null
+//       }
+//     }
+//   })
