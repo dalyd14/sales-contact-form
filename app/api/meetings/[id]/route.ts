@@ -1,9 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getDb } from "@/lib/db"
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const meetingId = params.id
+    const { id } = await params;
+    const meetingId = id
 
     const db = getDb();
     const result = await db.query(`

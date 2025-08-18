@@ -1,0 +1,120 @@
+[
+    {
+        "id": "1",
+        "name": "Vercel X Shopify",
+        "description": "Vercel allows you to integration seamlessly with Shopify.",
+        "tags": ["shopify"],
+        "product": "vercel",
+        "type": "documentation",
+        "url": "https://vercel.com/docs/integrations/ecommerce/shopify"
+    },
+    {
+        "id": "2",
+        "name": "Vercel Enables Composable Commerce",
+        "description": "Break free from monolithic architecture and untap your store's potential for unlimited global growth.",
+        "tags": ["ecommerce", "shopify"],
+        "product": "vercel",
+        "type": "blog",
+        "url": "https://vercel.com/blog/8-advantages-of-composable-commerce"
+    },
+    {
+        "id": "3",
+        "name": "Parachute Migrates from Shopify to Vercel",
+        "description": "Parachute migrates from Shopify to Vercel and improved their site page load times by 60% in one month.",
+        "tags": ["shopify"],
+        "product": "vercel",
+        "type": "blog",
+        "url": "https://vercel.com/resources/fast-sites-with-next-js-and-shopify#use-case-parachute-improves-site-page-load-times-by-60%-in-one-month"
+    },
+    {
+        "id": "4",
+        "name": "Improve Site Speed with Vercel",
+        "description": "Vercel's Edge network means robust personalization without compromising on speed.",
+        "tags": ["marketing", "infrastructure", "performance", "systems"],
+        "product": "vercel",
+        "type": "blog",
+        "url": "https://vercel.com/blog/the-user-experience-of-the-frontend-cloud"
+    },
+    {
+        "id": "5",
+        "name": "Vercel Firewall - Security that Scales",
+        "description": "Vercel's security features are designed to scale with your business.",
+        "tags": ["security", "infrastructure", "engineering"],
+        "product": "vercel",
+        "type": "documentation",
+        "url": "https://vercel.com/docs/vercel-firewall"
+    },
+    {
+        "id": "6",
+        "name": "Vercel for Platforms",
+        "description": "Get started with Vercel's multi-tenant Next.js example or learn more about customizing domains.",
+        "tags": ["platforms", "engineering", "infrastructure"],
+        "product": "vercel",
+        "type": "documentation",
+        "url": "https://vercel.com/docs/multi-tenant"
+    },
+    {
+        "id": "7",
+        "name": "Vercel's Developer Experience Platform",
+        "description": "Learn about powerful new features on Vercel's Developer Experience Platform to help scale code health, performance, and security.",
+        "tags": ["platforms", "engineering", "infrastructure", "security"],
+        "product": "vercel",
+        "type": "blog",
+        "url": "https://vercel.com/blog/introducing-conformance"
+    },
+    {
+        "id": "8",
+        "name": "A Deployment for Every Idea",
+        "description": "Push to preview. Setting up staging shouldn't be a separate step.",
+        "tags": ["platforms", "engineering", "design", "systems"],
+        "product": "vercel",
+        "type": "blog",
+        "url": "https://vercel.com/products/previews"
+    },
+    {
+        "id": "9",
+        "name": "v0 - Start Building Today",
+        "description": "v0 is a platform for building and shipping software faster. Try it out now, for free!",
+        "tags": ["product", "engineering", "design", "ai"],
+        "product": "v0",
+        "type": "prompt",
+        "url": "https://v0.app/chat"
+    },
+    {
+        "id": "10",
+        "name": "Add AI functionality to your projects with v0",
+        "description": "Add AI functionality to your projects with v0",
+        "tags": ["product", "engineering", "design", "ai"],
+        "product": "v0",
+        "type": "prompt",
+        "prompt": "Build a helpful AI chatbot that can help me figure out what to wear today.",
+        "url": "https://v0.app/chat"
+    },
+    {
+        "id": "11",
+        "name": "v0 X Github",
+        "description": "Connect your GitHub repositories to v0 to automatically create projects and track changes.",
+        "tags": ["product", "engineering", "design", "ai", "platform"],
+        "product": "v0",
+        "type": "documentation",
+        "url": "https://v0.app/docs/github"
+    },
+    {
+        "id": "12",
+        "name": "v0's Design Mode",
+        "description": "Design mode provides an intuitive, visual way to build and refine your app's user interface.",
+        "tags": ["product", "engineering", "design", "ai"],
+        "product": "v0",
+        "type": "documentation",
+        "url": "https://v0.app/docs/design-mode"
+    },
+    {
+        "id": "13",
+        "name": "v0 X Figma",
+        "description": "Turn your Figma files into high-fidelity UIs.",
+        "tags": ["product", "engineering", "design", "ai"],
+        "product": "v0",
+        "type": "documentation",
+        "url": "https://v0.app/docs/figma"
+    }
+]

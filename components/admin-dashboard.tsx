@@ -6,18 +6,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Separator } from "@/components/ui/separator"
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogHeader,
   DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { Calendar, Clock, User, Mail, Globe, MessageSquare, Users, CalendarDays, TrendingUp } from "lucide-react"
+  Typography
+} from "@mui/material"
+import { Calendar, Clock, User, Mail, Globe, MessageSquare, Users, CalendarDays, TrendingUp, Clapperboard } from "lucide-react"
 import type { SalesRep } from "@/lib/db"
 import { getCookie, upsertCookie } from "@/lib/utils"
+
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface MeetingWithDetails {
   id: number
@@ -34,6 +34,7 @@ interface MeetingWithDetails {
   prospect_message?: string
   sales_rep_name: string
   sales_rep_email: string
+  game_plan?: string
 }
 
 interface DashboardStats {
@@ -57,6 +58,8 @@ export function AdminDashboard() {
   })
   const [isLoading, setIsLoading] = useState(true)
   const [selectedMeeting, setSelectedMeeting] = useState<MeetingWithDetails | null>(null)
+
+  const [openDialog, setOpenDialog] = useState(false)
 
   useEffect(() => {
     const loadData = async () => {
@@ -115,6 +118,18 @@ export function AdminDashboard() {
       date: date.toLocaleDateString(),
       time: date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     }
+  }
+
+  const selectViewMeeting = async (meetingId: string) => {
+    const gamePlan = await fetch(`/api/game-plan-ai/${meetingId}`)
+    const gamePlanData = await gamePlan.json()
+
+    setSelectedMeeting(prev => ({
+      ...prev,
+      game_plan: gamePlanData.toString()
+    } as MeetingWithDetails))
+
+    setOpenDialog(true)
   }
 
   if (isLoading) {
@@ -251,74 +266,116 @@ export function AdminDashboard() {
                           </Badge>
                         </div>
                       </div>
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button variant="outline" size="sm" onClick={() => setSelectedMeeting(meeting)}>
-                            View Details
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-2xl">
-                          <DialogHeader>
-                            <DialogTitle>Meeting Details</DialogTitle>
-                            <DialogDescription>
-                              Meeting scheduled for {date} at {time}
-                            </DialogDescription>
-                          </DialogHeader>
-                          {selectedMeeting && (
-                            <div className="space-y-6">
-                              <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                  <h4 className="font-semibold mb-2">Prospect Information</h4>
-                                  <div className="space-y-2 text-sm">
-                                    <div className="flex items-center gap-2">
-                                      <Mail className="h-3 w-3 text-muted-foreground" />
-                                      {selectedMeeting.prospect_email}
+                      <div>
+                        <Button variant="outline" size="sm" onClick={() => {setSelectedMeeting(meeting); selectViewMeeting(meeting.id.toString()); setOpenDialog(true)}}>
+                          View Details
+                        </Button>                        
+                      </div>
+                      {
+                        selectedMeeting && (
+                        <Dialog open={openDialog} onClose={() => setOpenDialog(false)}
+                          fullWidth
+                          maxWidth="lg"
+                        >
+                          <DialogContent sx={{ width: "100%" }}>
+                            <DialogTitle>Meeting Details: {formatMeetingDate(selectedMeeting?.meeting_date || "").date} at {formatMeetingDate(selectedMeeting?.meeting_date || "" ).time}</DialogTitle>
+                            {selectedMeeting && (
+                              <div className="space-y-6">
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div>
+                                    <h4 className="font-semibold mb-2">Prospect Information</h4>
+                                    <div className="space-y-2 text-sm">
+                                      <div className="flex items-center gap-2">
+                                        <Mail className="h-3 w-3 text-muted-foreground" />
+                                        {selectedMeeting.prospect_email}
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                        <Globe className="h-3 w-3 text-muted-foreground" />
+                                        {selectedMeeting.prospect_country}
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                        <Badge variant="outline" className="text-xs capitalize">
+                                          {selectedMeeting.product_interest.replace("_", " & ")}
+                                        </Badge>
+                                      </div>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                      <Globe className="h-3 w-3 text-muted-foreground" />
-                                      {selectedMeeting.prospect_country}
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                      <Badge variant="outline" className="text-xs capitalize">
-                                        {selectedMeeting.product_interest.replace("_", " & ")}
-                                      </Badge>
+                                  </div>
+                                  <div>
+                                    <h4 className="font-semibold mb-2">Sales Rep</h4>
+                                    <div className="space-y-2 text-sm">
+                                      <div className="flex items-center gap-2">
+                                        <User className="h-3 w-3 text-muted-foreground" />
+                                        {selectedMeeting.sales_rep_name}
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                        <Mail className="h-3 w-3 text-muted-foreground" />
+                                        {selectedMeeting.sales_rep_email}
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
-                                <div>
-                                  <h4 className="font-semibold mb-2">Sales Rep</h4>
-                                  <div className="space-y-2 text-sm">
-                                    <div className="flex items-center gap-2">
-                                      <User className="h-3 w-3 text-muted-foreground" />
-                                      {selectedMeeting.sales_rep_name}
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                      <Mail className="h-3 w-3 text-muted-foreground" />
-                                      {selectedMeeting.sales_rep_email}
+                                {selectedMeeting.prospect_message && (
+                                  <div>
+                                    <h4 className="font-semibold mb-2 flex items-center gap-2">
+                                      <MessageSquare className="h-4 w-4" />
+                                      Prospect Form Submission Message
+                                    </h4>
+                                    <div className="bg-muted p-3 rounded-md text-sm">
+                                      {selectedMeeting.prospect_message}
                                     </div>
                                   </div>
-                                </div>
+                                )}
+                                { 
+                                  selectedMeeting.game_plan && (
+                                    <div>
+                                    <h4 className="font-semibold mb-2 flex items-center gap-2">
+                                      <Clapperboard className="h-4 w-4" />
+                                      Game Plan
+                                    </h4>
+                                    <div className="bg-muted p-3 rounded-md text-sm">
+                                    <div className="markdown-content">
+                                      <ReactMarkdown 
+                                        remarkPlugins={[remarkGfm]}
+                                        components={{
+                                            h1: ({children}) => <h1>{children}</h1>,
+                                            h2: ({children}) => <h2>{children}</h2>,
+                                            h3: ({children}) => <h3>{children}</h3>,
+                                            h4: ({children}) => <h4>{children}</h4>,
+                                            h5: ({children}) => <h5>{children}</h5>,
+                                            h6: ({children}) => <h6>{children}</h6>,
+                                            p: ({children}) => <p>{children}</p>,
+                                            code: ({children, className}) => {
+                                                const isInline = !className;
+                                                return isInline ? (
+                                                    <code>{children}</code>
+                                                ) : (
+                                                    <pre><code>{children}</code></pre>
+                                                );
+                                            },
+                                            pre: ({children}) => <pre>{children}</pre>,
+                                            blockquote: ({children}) => <blockquote>{children}</blockquote>,
+                                            a: ({children, href}) => <a href={href} target="_blank" rel="noopener noreferrer">{children}</a>,
+                                            ul: ({children}) => <ul>{children}</ul>,
+                                            ol: ({children}) => <ol>{children}</ol>,
+                                            li: ({children}) => <li>{children}</li>,
+                                            strong: ({children}) => <strong>{children}</strong>,
+                                            em: ({children}) => <em>{children}</em>,
+                                        }}
+                                    >
+                                        {selectedMeeting.game_plan}
+                                    </ReactMarkdown>
+                                    </div>
+                                    </div>
+                                  </div>
+                                  )
+                                }
                               </div>
-                              {selectedMeeting.prospect_message && (
-                                <div>
-                                  <h4 className="font-semibold mb-2 flex items-center gap-2">
-                                    <MessageSquare className="h-4 w-4" />
-                                    Prospect Message
-                                  </h4>
-                                  <div className="bg-muted p-3 rounded-md text-sm">
-                                    {selectedMeeting.prospect_message}
-                                  </div>
-                                </div>
-                              )}
-                              <Separator />
-                              <div className="flex items-center justify-between text-xs text-muted-foreground">
-                                <span>Meeting ID: {selectedMeeting.id}</span>
-                                <span>Created: {new Date(selectedMeeting.created_at).toLocaleDateString()}</span>
-                              </div>
-                            </div>
-                          )}
-                        </DialogContent>
-                      </Dialog>
+                            )}
+                          </DialogContent>
+                        </Dialog>                          
+                        )
+                      }
+
                     </div>
                   </div>
                 )

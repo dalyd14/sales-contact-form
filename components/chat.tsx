@@ -31,12 +31,14 @@ export default function Chat({ meetingId }: { meetingId: string }) {
     const fetchChat = async () => {
       const response = await fetch(`/api/meeting-chat/${meetingId}`);
       const data = await response.json();
-      setMessages(data[0].messages.map((msg: any) => {
-        if (!msg.parts && msg.content) {
-            msg.parts = msg.content
-        }
-        return msg;
-      }));
+      if (data[0].messages && data[0].messages.length > 0) {
+        setMessages(data[0].messages.map((msg: any) => {
+            if (!msg.parts && msg.content) {
+                msg.parts = msg.content
+            }
+            return msg;
+        }));
+      }
     }
     fetchChat();
   }, [meetingId]);

@@ -1,11 +1,12 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getDb } from "@/lib/db"
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const db = getDb();
     // confirm that the prospect id is valid
-    const prospectId = params.id
+    const prospectId = id
     
     const prospectResult = await db.query(`SELECT id FROM prospects WHERE id = $1`, [prospectId])
     if (prospectResult.rows.length === 0) {
