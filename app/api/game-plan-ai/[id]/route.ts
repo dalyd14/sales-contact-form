@@ -3,9 +3,14 @@ import { groq } from "@ai-sdk/groq";
 import { UIMessage, convertToModelMessages, generateText } from 'ai';
 import { NextRequest, NextResponse } from "next/server";
 
+import resources from "@/lib/resources.json"
+
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     const meetingId = id
+
+    const url = new URL(request.url)
+    const force = url.searchParams.get("force") || "false"
 
     const db = getDb()
 
@@ -13,9 +18,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         SELECT * FROM meeting_ai_chat WHERE meeting_id = $1
     `, [meetingId])
 
-    let gamePlan = result.rows[0].game_plan
+    let gamePlan = result.rows[0]?.game_plan || []
 
-    if (gamePlan.length === 0) {
+    if (gamePlan.length === 0 || force === "true") {
         // get the form submission from the prospect. it is joined on the meetings table by meetingId to the prospectId, then to the prospects table by prospectId
         const formSubmission = await db.query(`
             SELECT * FROM prospects WHERE id = (
@@ -23,41 +28,31 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
             )
         `, [meetingId])
 
-        gamePlan = await generateGamePlan(result.rows[0].messages, formSubmission.rows[0])
+        const vercelResources = (formSubmission.rows[0]?.ai_resources || []).map((resource: string) => {
+            const resourceData = resources.find((r: any) => r.id === resource)
+            return resourceData
+        })
 
-        await db.query(`
-            UPDATE meeting_ai_chat 
-            SET game_plan = $1 
-            WHERE meeting_id = $2
-        `, [JSON.stringify(gamePlan, null, 2), meetingId])
+        formSubmission.rows[0].ai_resources = vercelResources
+
+        gamePlan = await generateGamePlan(result.rows[0]?.messages || [], formSubmission.rows[0])
+
+        // check to see if there were any results found in the initial game plan query
+        if (result.rows.length > 0) {
+            // that means that something was already generate for this meeting, so we need to update the game plan
+            await db.query(`
+                UPDATE meeting_ai_chat 
+                SET game_plan = $1 
+                WHERE meeting_id = $2
+            `, [JSON.stringify(gamePlan, null, 2), meetingId])
+        } else {
+            await db.query(`
+                INSERT INTO meeting_ai_chat (meeting_id, game_plan)
+                VALUES ($1, $2)
+            `, [meetingId, JSON.stringify(gamePlan, null, 2)])
+        }
+
     }
-
-    return NextResponse.json(gamePlan)
-}
-
-export async function POST(request: NextRequest) {
-    const body = await request.json()
-    const { meetingId } = body
-
-    const db = getDb()
-
-    const result = await db.query(`
-        SELECT * FROM meeting_ai_chat WHERE meeting_id = $1
-    `, [meetingId])
-
-    const formSubmission = await db.query(`
-        SELECT * FROM prospects WHERE id = (
-            SELECT prospect_id FROM meetings WHERE id = $1
-        )
-    `, [meetingId])
-
-    const gamePlan = await generateGamePlan(result.rows[0].messages, formSubmission.rows[0])
-
-    await db.query(`
-        UPDATE meeting_ai_chat 
-        SET game_plan = $1 
-        WHERE meeting_id = $2
-    `, [JSON.stringify(gamePlan, null, 2), meetingId])
 
     return NextResponse.json(gamePlan)
 }

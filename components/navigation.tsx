@@ -27,12 +27,10 @@ export function Navigation() {
         description: "Start here to get in touch",
       }
       const prospectId = getCookie("prospectId")
-      console.log("prospectId", prospectId)
       if (prospectId) {
         const meeting = await fetch(`/api/meetings?prospectId=${prospectId}`)
         if (meeting.ok) {
           const meetingData = await meeting.json()
-          console.log("meetingData", meetingData)
           navItem.name = "Meeting Prep Room"
           navItem.href = `/prep-room?meetingId=${meetingData[0].id}`
         }

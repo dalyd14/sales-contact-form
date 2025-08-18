@@ -10,11 +10,14 @@ import {
   Dialog,
   DialogContent,
   DialogTitle,
-  Typography
+  Typography,
+  IconButton,
+  Box
 } from "@mui/material"
 import { Calendar, Clock, User, Mail, Globe, MessageSquare, Users, CalendarDays, TrendingUp, Clapperboard } from "lucide-react"
 import type { SalesRep } from "@/lib/db"
 import { getCookie, upsertCookie } from "@/lib/utils"
+import { RefreshCcw } from "lucide-react"
 
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -96,6 +99,15 @@ export function AdminDashboard() {
 
     loadData()
   }, [selectedRep])
+
+  const refreshGamePlan = async (meetingId: string) => {
+    const gamePlan = await fetch(`/api/game-plan-ai/${meetingId}?force=true`)
+    const gamePlanData = await gamePlan.json()
+    setSelectedMeeting(prev => ({
+      ...prev,
+      game_plan: gamePlanData.toString()
+    } as MeetingWithDetails))
+  }
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -328,10 +340,19 @@ export function AdminDashboard() {
                                 { 
                                   selectedMeeting.game_plan && (
                                     <div>
-                                    <h4 className="font-semibold mb-2 flex items-center gap-2">
-                                      <Clapperboard className="h-4 w-4" />
-                                      Game Plan
-                                    </h4>
+                                      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                        <h4 className="font-semibold mb-2 flex items-center gap-2">
+                                          <Clapperboard className="h-4 w-4" />
+                                          Game Plan
+                                        </h4>
+                                        <IconButton onClick={() => {
+                                          refreshGamePlan(selectedMeeting.id.toString())
+                                        }}>
+                                          <RefreshCcw className="h-4 w-4" />
+                                        </IconButton>                       
+                                      </Box>
+             
+                               
                                     <div className="bg-muted p-3 rounded-md text-sm">
                                     <div className="markdown-content">
                                       <ReactMarkdown 

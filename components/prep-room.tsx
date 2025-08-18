@@ -179,12 +179,14 @@ export function PrepRoom() {
 
       {/* Preparation Resources */}
       <div>
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-foreground mb-2">We think you might like these...</h2>
-        </div>
+        {meeting && meeting.ai_resources && meeting.ai_resources.length > 0 && (
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-foreground mb-2">We think you might like these...</h2>
+          </div>
+        )}
 
         <div className="grid md:grid-cols-2 gap-6">
-          {meeting && meeting.ai_resources && meeting.ai_resources.map((resource: string) => {
+          {(meeting && meeting.ai_resources && meeting.ai_resources.length > 0) ? meeting.ai_resources.map((resource: string) => {
             const resourceData = resources.find((r: any) => r.id === resource)
             return(
             <Card key={resource} className="hover:shadow-md transition-shadow">
@@ -207,7 +209,12 @@ export function PrepRoom() {
               </CardContent>
             </Card>
             )
-          })}
+          }) : (
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-foreground mb-2">We are coming up with resources special for you</h2>
+              <h2 className="text-2xl font-bold text-foreground mb-2">Check back soon to see what we come up with</h2>
+            </div>
+          )}
         </div>
       </div>
     </div>
