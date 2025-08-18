@@ -11,6 +11,8 @@ CREATE TABLE IF NOT EXISTS prospects (
   country VARCHAR(100) NOT NULL,
   product_interest VARCHAR(50) NOT NULL CHECK (product_interest IN ('vercel', 'v0', 'vercel_and_v0')),
   message TEXT,
+  ai_resources JSONB NOT NULL DEFAULT '[]',
+  resources_completed JSONB NOT NULL DEFAULT '[]',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -39,6 +41,7 @@ CREATE TABLE IF NOT EXISTS meeting_ai_chat (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   meeting_id UUID UNIQUE NOT NULL REFERENCES meetings(id) ON DELETE CASCADE,
   messages JSONB NOT NULL,
+  game_plan JSONB NOT NULL DEFAULT '[]',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
