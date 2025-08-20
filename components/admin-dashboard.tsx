@@ -60,25 +60,13 @@ interface MeetingWithDetails {
   game_plan?: string
 }
 
-interface DashboardStats {
-  totalMeetings: number
-  upcomingMeetings: number
-  completedMeetings: number
-  totalProspects: number
-}
-
 export function AdminDashboard() {
   const searchParams = useSearchParams()
   const salesRepId = searchParams.get("sales_rep")
   const [meetings, setMeetings] = useState<MeetingWithDetails[]>([])
   const [salesReps, setSalesReps] = useState<SalesRep[]>([])
   const [selectedRep, setSelectedRep] = useState<string>(salesRepId || getCookie("salesRepId") || "all")
-  const [stats, setStats] = useState<DashboardStats>({
-    totalMeetings: 0,
-    upcomingMeetings: 0,
-    completedMeetings: 0,
-    totalProspects: 0,
-  })
+
   const [isLoading, setIsLoading] = useState(true)
   const [selectedMeeting, setSelectedMeeting] = useState<MeetingWithDetails | null>(null)
 
@@ -620,7 +608,7 @@ export function AdminDashboard() {
                           <Clapperboard className="h-4 w-4" />
                           Game Plan
                         </h4>
-                        <IconButton onClick={() => {
+                        <IconButton sx={{cursor: "pointer", color: "white"}} onClick={() => {
                           refreshGamePlan(selectedMeeting.id.toString())
                         }}>
                           <RefreshCcw className="h-4 w-4" />

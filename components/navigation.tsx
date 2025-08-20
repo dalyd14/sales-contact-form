@@ -20,7 +20,7 @@ export function Navigation() {
 
   useEffect(() => {
     const loadMeeting = async () => {
-      let navItem = {
+      const navItem = {
         name: "Request Demo",
         href: "/",
         icon: Home,

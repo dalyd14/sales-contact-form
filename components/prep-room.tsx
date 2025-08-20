@@ -449,7 +449,7 @@ export function PrepRoom() {
             }}>
               <PenLine className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <Typography variant="body2" component="p" className="text-sm text-muted-foreground text-center">
-                We're working on something special for you!
+                {`We're working on something special for you!`}
               </Typography>
               <Typography variant="body2" component="p" className="text-sm text-muted-foreground text-center">
                 Check back soon to discover new resources tailored just for you.

@@ -1,6 +1,6 @@
 import { getDb } from "@/lib/db";
 import { groq } from "@ai-sdk/groq";
-import { UIMessage, convertToModelMessages, generateText } from 'ai';
+import { UIMessage, generateText } from 'ai';
 import { NextRequest, NextResponse } from "next/server";
 
 import resources from "@/lib/resources.json"
@@ -57,7 +57,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json(gamePlan)
 }
 
-export async function generateGamePlan(chatHistory: UIMessage[], formSubmission: any) {
+async function generateGamePlan(chatHistory: UIMessage[], formSubmission: any) {
 
     const { text } = await generateText({
         model: groq("moonshotai/kimi-k2-instruct"),

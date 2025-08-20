@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
 
         const db = getDb()
 
-        const result = await db.query(`
+        await db.query(`
             INSERT INTO events (user_id, event_type, event_name)
             VALUES ($1, $2, $3)
         `, [user_id, event_type, event_name])

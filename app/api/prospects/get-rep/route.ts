@@ -1,11 +1,8 @@
-import { type NextRequest, NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 import { getDb } from "@/lib/db"
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
-    const body = await request.json()
-    const { prospectId } = body
-
     // Simple round-robin assignment - get the rep with the fewest meetings
     const db = getDb();
     const result = await db.query(`

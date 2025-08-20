@@ -1,5 +1,7 @@
 // db.ts
 import type { QueryResult } from "pg";
+import { Pool } from "pg";
+import { neon, neonConfig } from "@neondatabase/serverless";
 
 // Narrow app-level interface
 export type Queryable = {
@@ -18,7 +20,6 @@ export function getDb(): Queryable {
   if (isProd()) {
     // ---- Neon serverless path ----
     // Works in serverless/edge, no Node TCP sockets required
-    const { neon, neonConfig } = require("@neondatabase/serverless");
     // Cache connections across invocations (Vercel/Cloudflare friendly)
     neonConfig.fetchConnectionCache = true;
 
@@ -26,17 +27,15 @@ export function getDb(): Queryable {
 
     // Simple adapter so the rest of your app uses db.query(text, params)
     db = {
-      async query(text: string, params?: any[]) {
-        // neon client supports $1, $2 params as an array or template-tag style
-        // Use the array form for parity with `pg`
-        const result = await sql(text, params ?? []);
-        // result already in row objects
-        return { rows: result as any[] };
+      async query(text: string) {
+        // For Neon, we need to use the raw query approach
+        // This bypasses the template literal requirement
+        const result = await sql.unsafe(text);
+        return { rows: result as unknown as any[] };
       },
     };
   } else {
     // ---- Local Postgres path (pg + Pool) ----
-    const { Pool } = require("pg");
     const pool = new Pool({
       connectionString: process.env.DATABASE_URL,
       max: 10,                 // sensible local default
