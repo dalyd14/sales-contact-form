@@ -24,10 +24,9 @@ import {
   TableBody,
   TableRow,
   TableHead,
-  Paper,
   Button
 } from "@mui/material"
-import { Calendar, Clock, User, Mail, Globe, MessageSquare, Users, CalendarDays, TrendingUp, Clapperboard, Blocks, ExternalLink } from "lucide-react"
+import { Calendar, Clock, User, Mail, Globe, MessageSquare, Clapperboard, Blocks, ExternalLink } from "lucide-react"
 import { AutoAwesomeOutlined, BookmarksOutlined, KeyboardTab } from "@mui/icons-material"
 import type { SalesRep } from "@/lib/db"
 import { getCookie, upsertCookie } from "@/lib/utils"

@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react"
 import { usePathname } from "next/navigation"
 import { AppBar, Box, Container, Toolbar, Typography, Link } from "@mui/material"
-import { cn } from "@/lib/utils"
 import { Home, Users } from "lucide-react"
 import { getCookie } from "@/lib/utils"
 

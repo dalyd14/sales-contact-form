@@ -5,8 +5,7 @@ import type React from "react"
 import { useState } from "react"
 import { 
   Card, 
-  CardContent, 
-  CardHeader, 
+  CardContent,
   Typography, 
   FormControl, 
   InputLabel, 
@@ -15,10 +14,7 @@ import {
   TextField,
   Button,
   Box,
-  IconButton,
-  Tooltip
 } from "@mui/material"
-import { Info as InfoIcon } from "@mui/icons-material"
 import { countries, productOptions } from "@/lib/countries"
 import { Loader2 } from "lucide-react"
 import { CalendarBooking } from "./calendar-booking"

@@ -2,7 +2,7 @@
 
 import { useChat } from '@ai-sdk/react';
 import { useState, useCallback, useMemo, useEffect } from 'react';
-import { Box, TextField, Typography, InputAdornment, IconButton, Button } from '@mui/material';
+import { Box, TextField, Typography, InputAdornment, IconButton } from '@mui/material';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import ArrowUpIcon from '@mui/icons-material/ArrowUpward';

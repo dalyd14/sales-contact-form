@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
-import { Badge } from "@/components/ui/badge"
 import { Button, Box, CardContent, CardHeader, Card, Typography, Divider, FormControlLabel, Checkbox } from "@mui/material"
 import { Clock, User, CheckCircle, ExternalLink, PenLine, FileQuestionMark } from "lucide-react"
 import { Chat, AutoAwesome, AutoFixHigh, Article, HistoryEdu, CalendarMonth, School } from "@mui/icons-material"

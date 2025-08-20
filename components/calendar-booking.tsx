@@ -1,13 +1,12 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
-import { Box, Card, CardContent, CardHeader, Typography, Divider, Button } from "@mui/material"
+import { useRouter } from "next/navigation"
+import { Box, Card, CardContent, Typography, Divider, Button } from "@mui/material"
 import { Calendar } from "@/components/ui/calendar"
-import { Loader2, Clock, User } from "lucide-react"
+import { Loader2, User } from "lucide-react"
 import type { SalesRep } from "@/lib/db"
 import { upsertCookie } from "@/lib/utils"
-import { CardDescription } from "./ui/card"
 
 interface TimeSlot {
   time: string
