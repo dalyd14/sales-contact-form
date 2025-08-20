@@ -32,9 +32,11 @@ export function Navigation() {
         const meeting = await fetch(`/api/meetings?prospectId=${prospectId}`)
         if (meeting.ok) {
           const meetingData = await meeting.json()
-          navItem.name = "Meeting Prep Room"
-          navItem.href = `/prep-room?meetingId=${meetingData[0].id}`
-          navItem.compHref = '/prep-room'
+          if (meetingData.length > 0) {
+            navItem.name = "Meeting Prep Room"
+            navItem.href = `/prep-room?meetingId=${meetingData[0].id}`
+            navItem.compHref = '/prep-room'            
+          }
         }
       }
       setNavigationItems([navItem, ...navigationItems])

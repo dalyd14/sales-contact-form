@@ -139,7 +139,7 @@ export function CalendarBooking({ prospectId }: { prospectId: string }) {
             color: "white"
           }}>
             <CardContent>
-            <Typography variant="h6" sx={{ color: "white", fontFamily: "GeistSans" }}>
+            <Typography variant="h6" sx={{ color: "white", fontFamily: "GeistSans", mb:1 }}>
                 Your Sales Expert
               </Typography>
               <div className="flex items-center gap-3">
