@@ -29,23 +29,23 @@ export async function POST(request: NextRequest) {
     const prospectId = result.rows[0].id
 
     // // send this data to pipedream for async enrichment
-    // await fetch("https://eozkzc12am8yo39.m.pipedream.net", {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //     "Authorization": `Bearer ${process.env.PIPEDREAM_TOKEN}`
-    //   },
-    //   body: JSON.stringify({
-    //     event: "prospect_created",
-    //     data: {
-    //       prospectId: prospectId,
-    //       email: email,
-    //       country: country,
-    //       product_interest: product_interest,
-    //       message: message,
-    //     }
-    //   })
-    // })
+    await fetch("https://hook.us2.make.com/47qjqtjie6a9n0cccfid1qo8repfr3co", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-make-apikey": `${process.env.MAKE_TOKEN}`
+      },
+      body: JSON.stringify({
+        event: "prospect_created",
+        data: {
+          prospectId: prospectId,
+          email: email,
+          country: country,
+          product_interest: product_interest,
+          message: message,
+        }
+      })
+    })
 
     return NextResponse.json({ prospectId })
   } catch (error) {
