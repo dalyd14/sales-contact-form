@@ -1,8 +1,8 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { AppBar, Box, Container, Toolbar, Typography, Link } from "@mui/material"
 import { cn } from "@/lib/utils"
 import { Home, Users } from "lucide-react"
 import { getCookie } from "@/lib/utils"
@@ -15,6 +15,7 @@ export function Navigation() {
       href: "/admin",
       icon: Users,
       description: "Sales team dashboard",
+      compHref: "/admin",
     },
   ])
 
@@ -25,6 +26,7 @@ export function Navigation() {
         href: "/",
         icon: Home,
         description: "Start here to get in touch",
+        compHref: "/",
       }
       const prospectId = getCookie("prospectId")
       if (prospectId) {
@@ -33,6 +35,7 @@ export function Navigation() {
           const meetingData = await meeting.json()
           navItem.name = "Meeting Prep Room"
           navItem.href = `/prep-room?meetingId=${meetingData[0].id}`
+          navItem.compHref = '/prep-room'
         }
       }
       setNavigationItems([navItem, ...navigationItems])
@@ -40,45 +43,61 @@ export function Navigation() {
     loadMeeting()
   }, [])
 
-
-
   return (
-    <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto px-4">
-        <div className="flex h-16 items-center justify-between">
-          <div className="flex items-center gap-8 w-full">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-md bg-primary flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-sm">V</span>
-              </div>
-              <span className="font-bold text-lg">Vercel</span>
-            </Link>
-
-            <div className={`hidden md:flex items-center ${navigationItems.length === 1 ? "justify-end" : "justify-between"} w-full gap-6`}>
+    <AppBar  component="nav" position="sticky" sx={{ backgroundColor: "black", borderBottom: "1px solid #a1a1a1" }}>
+      <Container maxWidth="xl" sx={{ backgroundColor: "black" }}>
+        <Toolbar disableGutters sx={{ backgroundColor: "black" }}>
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+              <Link href="/" className="flex items-center gap-2"
+                sx={{
+                  textDecoration: "none",
+                  mr: 5
+                }}
+              >
+                <Box sx={{ display: "flex", alignItems: "center", gap: 0 }}>
+                      <svg width="32" height="32" viewBox="0 0 76 65" fill="none" xmlns="http://www.w3.org/2000/svg"><path
+                  d="M37.5274 0L75.0548 65H0L37.5274 0Z" fill="#ffffff"/></svg>
+                  <Typography variant="h6" sx={{ color: "white", fontSize: "1.9rem", fontFamily: "GeistSans" }}>Vercel</Typography>
+                </Box>
+              
+              </Link>
+              <Box sx={{ display: "flex", alignItems: "center", justifyContent: (navigationItems.length > 1) ? "space-between" : "flex-end", width: "100%" }}>
               {navigationItems.map((item) => {
-                const Icon = item.icon
-                const isActive = pathname === item.href
-
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={cn(
-                      "flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                      isActive
-                        ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted",
-                    )}
-                  >
-                    <Icon className="h-4 w-4" />
-                    {item.name}
-                  </Link>
-                )
-              })}
-            </div>
-          </div>
-        </div>
-      </div>
-    </nav>
+                  const Icon = item.icon
+                  const isActive = pathname === (item.compHref || item.href)
+                  
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      sx={{ 
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1,
+                        px:2,
+                        py:1,
+                        my:1,
+                        borderRadius: 4,
+                        fontSize: 16,
+                        fontWeight: 500,
+                        textDecoration: "none",
+                        backgroundColor: isActive ? "white" : "transparent",
+                        color: isActive ? "black" : "#a1a1a1",
+                        "&:hover": {
+                          backgroundColor: isActive ? "#a1a1a1" : "transparent",
+                          color: isActive ? "black" : "white"
+                        }
+                       }}
+                    >
+                      <Icon className="h-4 w-4" />
+                      {item.name}
+                    </Link>
+                  )
+                })}
+              </Box>
+          </Box>
+        </Toolbar>
+      </Container>
+    </AppBar>
   )
 }

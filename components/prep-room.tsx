@@ -3,12 +3,13 @@
 import { useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { Badge } from "@/components/ui/badge"
-import { Button, Box, CardContent, CardHeader, Card, Typography, Divider } from "@mui/material"
-import { Calendar, Clock, User, CheckCircle, ExternalLink, PenLine } from "lucide-react"
-import { Chat, AutoAwesome, AutoFixHigh, Article, HistoryEdu } from "@mui/icons-material"
+import { Button, Box, CardContent, CardHeader, Card, Typography, Divider, FormControlLabel, Checkbox } from "@mui/material"
+import { Clock, User, CheckCircle, ExternalLink, PenLine, FileQuestionMark } from "lucide-react"
+import { Chat, AutoAwesome, AutoFixHigh, Article, HistoryEdu, CalendarMonth, School } from "@mui/icons-material"
 import type { MeetingWithDetails } from "@/lib/db"
 import ChatComponent from "./chat"
 import { Dialog, DialogContent } from "@mui/material"
+import { getCookie } from "@/lib/utils"
 
 import resources from "@/lib/resources.json"
 
@@ -45,12 +46,64 @@ export function PrepRoom() {
       } catch (error) {
         console.error("Error loading meeting:", error)
       } finally {
+        const user_id = getCookie("prospectId")
+        await fetch(`/api/events`, {
+          method: "POST",
+          body: JSON.stringify({
+            user_id: user_id,
+            event_type: "page",
+            event_name: "prep_room"
+          })
+        })
         setIsLoading(false)
       }
     }
 
     loadMeeting()
   }, [meetingId])
+
+  const handleResourceClicked = (resource: string, url: string) => {
+    openNewTab(url)
+    fetch(`/api/events`, {
+      method: "POST",
+      body: JSON.stringify({
+        user_id: meeting?.prospect_id,
+        event_type: "track",
+        event_name: "resource_viewed"
+      })
+    })
+    // Check if resource has already been completed
+    if (!meeting?.resources_completed.includes(resource)) {
+      fetch(`/api/events`, {
+        method: "POST",
+        body: JSON.stringify({
+          user_id: meeting?.prospect_id,
+          event_type: "track",
+          event_name: "resource_completed"
+        })
+      })
+    }
+    setResourceChecked(resource)
+    fetch(`/api/prospects/complete_resource`, {
+      method: "POST",
+      body: JSON.stringify({
+        prospectId: meeting?.prospect_id,
+        resourceId: resource
+      })
+    })
+
+  }
+
+  const setResourceChecked = (resource: string) => {
+    if (meeting) {
+      const updatedResources = [...meeting.resources_completed, resource]
+      setMeeting({ ...meeting, resources_completed: updatedResources })
+    }
+  }
+
+  const openNewTab = (url: string) => {
+    window.open(url, '_blank')
+  }
 
   if (!meetingId) {
     return (
@@ -100,19 +153,24 @@ export function PrepRoom() {
       </div>
 
       {/* Meeting Details */}
-      <Card>
-        <CardHeader
-        avatar={<Calendar className="h-5 w-5" />}
-        title={<Typography variant="h6" component="h2" sx={{
+      <Card sx={{
+        backgroundColor: "transparent",
+        color: "white",
+        mb:0
+      }}>
+        <Box sx={{
           display: 'flex',
           flexDirection: 'row',
+          justifyContent: 'flex-start',
           alignItems: 'center',
-          gap: 1
-        }}>Meeting Details for <span className="font-bold">{meeting.prospect_email}</span></Typography>}
-        />
-        <Divider sx={{
-          margin: "0 1rem"
-        }}/>
+          width: '100%'
+        }}>
+          <CalendarMonth style={{
+            fontSize: "2.5rem",
+            marginRight: 10
+          }}/>
+          <h2 className="text-2xl font-bold text-foreground">Meeting Details for {meeting.prospect_email}</h2>
+        </Box>
         <CardContent>
           <Box sx={{
             display: 'flex',
@@ -130,12 +188,6 @@ export function PrepRoom() {
                   </h4>
                   <p className="text-sm text-muted-foreground">{isUpcoming ? "Upcoming" : "Past"} meeting</p>
                 </div>
-              </div>            
-              <div>
-                <h4>Your Interest</h4>
-                <Badge variant="secondary" className="capitalize">
-                  {meeting.product_interest.replaceAll("_", " ")}
-                </Badge>
               </div>
           </Box>
           <Box sx={{
@@ -145,8 +197,7 @@ export function PrepRoom() {
             alignItems: 'center',
             width: '100%'
           }}>
-            <div className="space-y-4">
-
+            <div className="space-y-4"> 
               <div className="flex items-center gap-3">
                 <User className="h-5 w-5 text-muted-foreground" />
                 <div>
@@ -155,38 +206,105 @@ export function PrepRoom() {
                 </div>
               </div>
             </div>
-            <div className="space-y-4">
-              <div>
-                  <h4>Status</h4>
-                  <Badge variant={meeting.status === "scheduled" ? "default" : "secondary"} className="capitalize">
-                  {meeting.status}
-                  </Badge>
-              </div>
-          </div>
 
+          </Box>
+          <Box sx={{
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            width: '100%'
+          }}>
+            <div className="space-y-4"> 
+              <div className="flex items-center gap-3">
+                <FileQuestionMark className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <h4>Responses</h4>
+                  <p className="text-sm text-muted-foreground">{meeting.product_interest}{meeting.prospect_message && ` - ${meeting.prospect_message}`}</p>
+                </div>
+              </div>
+            </div>
           </Box>
         </CardContent>
       </Card>
 
+      <Divider sx={{
+        borderColor: "#a1a1a1",
+        my: 4
+      }}/>
+
       {/* Chat with Vercel AI Assistant Button */}
-      <div className="flex justify-center">
-        <Button
-        variant="contained" 
-        color="primary" 
-        sx={{
-          height: "75px",
-          backgroundColor: "black",
-          color: "white",
-          fontSize: "1.1rem"
-        }}
-        startIcon={<AutoAwesome />}
-        onClick={() => setShowChat(true)}>
-          Help Us Prepare for the Meeting
-        </Button>
-      </div>
+      <Box sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'flex-start',
+        width: '100%',
+        mb: 2
+      }}>
+        <Box sx={{
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'flex-start',
+          alignItems: 'center',
+          width: '100%',
+          mb: 2
+        }}>
+          <Chat style={{
+            fontSize: "2.5rem",
+            marginRight: 10
+          }}/>
+          <h2 className="text-2xl font-bold text-foreground mb-2">Chat with Vercel AI Assistant</h2>
+        </Box>
+        <Box sx={{
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          width: '100%',
+          mb: 2
+        }}>
+          <Box sx={{width:'50%'}}>
+            <Typography variant="body1" component="p" sx={{
+              fontSize: "0.9rem"
+            }}>
+              Help us to better prepare for the meeting by chatting with our AI chatbot. This will help add more context for our Sales Rep. Your responses will be used to prepare for the meeting.
+            </Typography>
+
+
+          </Box>
+          <Button
+          variant="contained" 
+          color="primary" 
+          sx={{
+            height: "75px",
+            backgroundColor: "black",
+            color: "white",
+            fontSize: "1.1rem",
+            border: "1px solid #a1a1a1"
+          }}
+          startIcon={<AutoAwesome />}
+          onClick={() => {
+            setShowChat(true);
+            fetch(`/api/events`, {
+              method: "POST",
+              body: JSON.stringify({
+                user_id: meeting?.prospect_id,
+                event_type: "track",
+                event_name: "chat_opened"
+              })
+            });
+          }}>
+            Help Us Prepare for the Meeting
+          </Button>          
+        </Box>
+
+      </Box>
+
 
       <Divider sx={{
-        my: 2
+        borderColor: "#a1a1a1",
+        my: 4
       }}/>
 
       {/* Chat Modal */}
@@ -195,17 +313,28 @@ export function PrepRoom() {
           borderRadius: "10px"
         }
       }} fullWidth={true} maxWidth="lg" open={showChat} onClose={() => setShowChat(false)}>
-        <DialogContent sx={{ padding: 0, borderRadius: "10px" }}>
-          <ChatComponent meetingId={meetingId} />
+        <DialogContent sx={{ padding: 0, borderRadius: "10px", border: "1px solid #a1a1a1" }}>
+          <ChatComponent meetingId={meetingId} readOnly={false} />
         </DialogContent>
       </Dialog>
 
       {/* Preparation Resources */}
       <div>
         {meeting && meeting.ai_resources && meeting.ai_resources.length > 0 && (
-          <div className="mb-6">
+          <Box sx={{
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'flex-start',
+            alignItems: 'center',
+            width: '100%',
+            mb: 2
+          }}>
+            <School style={{
+              fontSize: "2.5rem",
+              marginRight: 10
+            }}/>
             <h2 className="text-2xl font-bold text-foreground mb-2">We think you might like these...</h2>
-          </div>
+          </Box>
         )}
 
         <Box sx={{
@@ -216,22 +345,27 @@ export function PrepRoom() {
         }}>
           {(meeting && meeting.ai_resources && meeting.ai_resources.length > 0) ? meeting.ai_resources.map((resource: string) => {
             const resourceData = resources.find((r: any) => r.id === resource)
+            const resourceChecked = meeting.resources_completed.includes(resource)
             return(
             <Card key={resource} sx={{
               width: '32%',
               borderRadius: '10px',
               boxShadow: '0 0 10px 0 rgba(0, 0, 0, 0.1)',
               flexDirection: 'column',
-              justifyContent: 'space-between',
+              justifyContent: 'flex-start',
               alignItems: 'center',
               padding: '1rem',
-              display: 'flex'
+              display: 'flex',
+              border: "1px solid #a1a1a1",
+              backgroundColor: "black",
+              color: "white"  
             }}>
               <CardHeader
               sx={{
                 pb:1,
                 pt: 0,
-                px:0
+                px:0,
+                width:'100%'
               }}
               avatar={getResourceIcon(resourceData?.type || "")}
               title={<Typography variant="h6" component="h3" sx={{
@@ -241,28 +375,66 @@ export function PrepRoom() {
               <CardContent sx={{
                 display: 'flex',
                 flexDirection: 'column',
-                justifyContent: 'center',
+                justifyContent: 'space-between',
                 alignItems: 'center',
-                p:0
+                height: '100%',
+                p:'0 !important'
               }}>
                 <Typography variant="body1" component="p" sx={{
                   fontSize: "0.9rem"
                 }}>{resourceData?.description || ""}</Typography>
-                <Button variant="contained" color="primary" sx={{ mt: 2 }} endIcon={<ExternalLink/>}>
-                  <a href={resourceData?.url || ""} target="_blank" rel="noopener noreferrer">
-                    <span>{(() => {
-                      switch (resourceData?.type) {
-                        case "blog":
-                          return "Read Blog"
-                        case "documentation":
-                          return "Check Docs"
-                        case "prompt":
-                          return "Try v0"
-                        default:
-                          return "Explore"
-                      }
-                    })()}</span>
-                  </a>
+
+                <Button
+                  variant="contained"
+                  onClick={() => handleResourceClicked(resource, resourceData?.url || "")}
+                  endIcon={<ExternalLink />}
+                  sx={{
+                    cursor: "pointer",
+                    background: "#111",
+                    color: "#fff",
+                    border: "1px solid #fff",
+                    boxShadow: "none",
+                    '&:hover': {
+                      background: "#222",
+                      color: "#fff",
+                      border: "1px solid #fff",
+                      boxShadow: "none"
+                    },
+                    borderRadius: "8px",
+                    mt: 2,
+                    transition: "background 0.2s"
+                  }}
+                >
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={resourceChecked}
+                        sx={{
+                          color: "#fff",
+                          '&.Mui-checked': {
+                            color: "#fff",
+                          },
+                        }}
+                      />
+                    }
+                    sx={{
+                      color: "white",
+                    }}
+                    label={
+                      (() => {
+                        switch (resourceData?.type) {
+                          case "blog":
+                            return "Read Blog"
+                          case "documentation":
+                            return "Check Docs"
+                          case "prompt":
+                            return "Try v0"
+                          default:
+                            return "Explore"
+                        }
+                      })()
+                    }
+                  />
                 </Button>
               </CardContent>
             </Card>

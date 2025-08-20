@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Box, Card, CardContent, CardHeader, Typography, Divider, Button } from "@mui/material"
 import { Calendar } from "@/components/ui/calendar"
 import { Loader2, Clock, User } from "lucide-react"
 import type { SalesRep } from "@/lib/db"
 import { upsertCookie } from "@/lib/utils"
+import { CardDescription } from "./ui/card"
 
 interface TimeSlot {
   time: string
@@ -92,6 +92,14 @@ export function CalendarBooking({ prospectId }: { prospectId: string }) {
 
       if (response.ok) {
         const { meetingId } = await response.json()
+        fetch(`/api/events`, {
+          method: "POST",
+          body: JSON.stringify({
+            user_id: prospectId,
+            event_type: "track",
+            event_name: "meeting_booked"
+          })
+        })
         upsertCookie("prospectId", prospectId)
         router.push(`/prep-room?meetingId=${meetingId}`)
       } else {
@@ -116,66 +124,101 @@ export function CalendarBooking({ prospectId }: { prospectId: string }) {
   }
 
   return (
-    <div className="grid md:grid-cols-2 gap-8">
-      {/* Calendar Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Select Date</CardTitle>
-          <CardDescription>Choose a date for your meeting</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Calendar
-            mode="single"
-            selected={selectedDate}
-            onSelect={setSelectedDate}
-            disabled={(date) => {
-              // Disable past dates and weekends
-              const today = new Date()
-              today.setHours(0, 0, 0, 0)
-              return date < today || date.getDay() === 0 || date.getDay() === 6
-            }}
-            className="rounded-md border"
-          />
-        </CardContent>
-      </Card>
+    <Box sx={{
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      width: "100%"
+    }}>
 
-      {/* Time Slots and Rep Info */}
-      <div className="space-y-6">
         {/* Assigned Rep Info */}
         {assignedRep && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
-                Your Sales Expert
-              </CardTitle>
-            </CardHeader>
+          <Card sx={{
+            width: "100%",
+            backgroundColor: "black",
+            color: "white"
+          }}>
             <CardContent>
+            <Typography variant="h6" sx={{ color: "white", fontFamily: "GeistSans" }}>
+                Your Sales Expert
+              </Typography>
               <div className="flex items-center gap-3">
                 <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
                   <User className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <p className="font-semibold">{assignedRep.name}</p>
-                  <p className="text-sm text-muted-foreground">{assignedRep.email}</p>
+                  <Typography variant="body1" sx={{ color: "white", fontFamily: "GeistSans" }}>
+                    {assignedRep.name}
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: "white", fontFamily: "GeistSans" }}>
+                    {assignedRep.email}
+                  </Typography>
                 </div>
               </div>
             </CardContent>
           </Card>
         )}
+        <Divider sx={{
+          width: "100%",
+          borderColor: "#a1a1a1",
+          my: 4
+        }} />
+        <Box sx={{
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "flex-start",
+          justifyContent: "center",
+          width: "100%"
+        }}>
+          {/* Calendar Section */}
+          <Card sx={{
+            width: "60%",
+            backgroundColor: "black",
+            color: "white"
+          }}>
+            <CardContent>
+              <Typography variant="h6" sx={{ color: "white", fontFamily: "GeistSans" }}>
+                Select Date
+              </Typography>
+              <Typography variant="body2" sx={{ color: "white", fontFamily: "GeistSans", mb: 2 }}>
+                Choose a date for your meeting
+              </Typography>
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={setSelectedDate}
+                disabled={(date) => {
+                  // Disable past dates and weekends
+                  const today = new Date()
+                  today.setHours(0, 0, 0, 0)
+                  return date < today || date.getDay() === 0 || date.getDay() === 6
+                }}
+                className="rounded-md border"
+              />
+            </CardContent>
+          </Card>
 
-        {/* Time Slots */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Clock className="h-5 w-5" />
-              Available Times
-            </CardTitle>
-            <CardDescription>
-              {selectedDate ? `Select a time for ${selectedDate.toLocaleDateString()}` : "Please select a date first"}
-            </CardDescription>
-          </CardHeader>
+          {/* Vertical Divider */}
+          <Divider orientation="vertical" flexItem sx={{
+            borderColor: "#a1a1a1",
+            mx: 4
+          }} />
+    
+
+          {/* Time slots section */}
+          <Card sx={{
+            width: "40%",
+            backgroundColor: "black",
+            color: "white"
+          }}>
           <CardContent>
+          <Typography variant="h6" sx={{ color: "white", fontFamily: "GeistSans" }}>
+              Select a time
+            </Typography>
+            <Typography variant="body2" sx={{ color: "white", fontFamily: "GeistSans", mb: 2 }}>
+              {selectedDate ? `Choose a time for ${selectedDate.toLocaleDateString()}` : "Please select a date first"}
+            </Typography>
             {!selectedDate ? (
               <p className="text-center text-muted-foreground py-8">Select a date to see available times</p>
             ) : isLoading ? (
@@ -187,11 +230,20 @@ export function CalendarBooking({ prospectId }: { prospectId: string }) {
                 {timeSlots.map((slot) => (
                   <Button
                     key={slot.time}
-                    variant={selectedTime === slot.time ? "default" : "outline"}
-                    size="sm"
+                    variant={selectedTime === slot.time ? "contained" : "outlined"}
+                    size="small"
                     disabled={!slot.available}
                     onClick={() => setSelectedTime(slot.time)}
-                    className="justify-center"
+                    sx={{
+                      width: "100%",
+                      backgroundColor: selectedTime === slot.time ? "white" : "black",
+                      color: selectedTime === slot.time ? "black" : "white",
+                      border: "1px solid #a1a1a1",
+                      cursor: "pointer",
+                      "&:hover": {
+                        color: selectedTime === slot.time ? "black" : "#a1a1a1"
+                      }
+                    }}
                   >
                     {slot.time}
                   </Button>
@@ -199,34 +251,32 @@ export function CalendarBooking({ prospectId }: { prospectId: string }) {
               </div>
             )}
           </CardContent>
-        </Card>
+          </Card>
+        </Box>
 
         {/* Book Meeting Button */}
-        {selectedDate && selectedTime && assignedRep && (
-          <Card>
-            <CardContent className="pt-6">
-              <div className="space-y-4">
-                <div className="text-center">
-                  <p className="font-semibold">Meeting Summary</p>
-                  <p className="text-sm text-muted-foreground">
-                    {selectedDate.toLocaleDateString()} at {selectedTime} with {assignedRep.name}
-                  </p>
-                </div>
-                <Button onClick={handleBookMeeting} className="w-full" disabled={isBooking}>
-                  {isBooking ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Booking Meeting...
-                    </>
-                  ) : (
-                    "Confirm Meeting"
-                  )}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-    </div>
+        <Button onClick={handleBookMeeting} sx={{
+          width: "60%",
+          backgroundColor: "black",
+          color: "white",
+          border: "1px solid #a1a1a1",
+          cursor: "pointer",
+          "&:hover": {
+            backgroundColor: "black",
+            color: "#a1a1a1",
+            border: "1px solid #a1a1a1"
+          },
+          marginTop: 3
+        }} disabled={isBooking}>
+          {isBooking ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Booking Meeting...
+            </>
+          ) : (
+            "Confirm Meeting"
+          )}
+        </Button>
+    </Box>
   )
 }

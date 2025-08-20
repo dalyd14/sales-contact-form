@@ -3,6 +3,7 @@ DROP TABLE IF EXISTS meetings CASCADE;
 DROP TABLE IF EXISTS prospects CASCADE;
 DROP TABLE IF EXISTS sales_reps CASCADE;
 DROP TABLE IF EXISTS meeting_ai_chat CASCADE;
+DROP TABLE IF EXISTS events CASCADE;
 
 -- Create prospects table to store contact form submissions
 CREATE TABLE IF NOT EXISTS prospects (
@@ -12,6 +13,7 @@ CREATE TABLE IF NOT EXISTS prospects (
   product_interest VARCHAR(50) NOT NULL CHECK (product_interest IN ('vercel', 'v0', 'vercel_and_v0')),
   message TEXT,
   ai_resources JSONB NOT NULL DEFAULT '[]',
+  enrichment JSONB NOT NULL DEFAULT '{}',
   resources_completed JSONB NOT NULL DEFAULT '[]',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -42,6 +44,15 @@ CREATE TABLE IF NOT EXISTS meeting_ai_chat (
   meeting_id UUID UNIQUE NOT NULL REFERENCES meetings(id) ON DELETE CASCADE,
   messages JSONB NOT NULL DEFAULT '[]',
   game_plan JSONB NOT NULL DEFAULT '[]',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS events (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID NOT NULL,
+  event_type VARCHAR(255) NOT NULL,
+  event_name VARCHAR(255) NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

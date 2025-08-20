@@ -6,8 +6,9 @@ import { Box, TextField, Typography, InputAdornment, IconButton, Button } from '
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import ArrowUpIcon from '@mui/icons-material/ArrowUpward';
+import { getCookie } from '@/lib/utils';
 
-export default function Chat({ meetingId }: { meetingId: string }) {
+export default function Chat({ meetingId, readOnly, height }: { meetingId: string, readOnly: boolean, height?: string }) {
   const [input, setInput] = useState('');
   const [isWaiting, setIsWaiting] = useState(false);
 
@@ -31,7 +32,7 @@ export default function Chat({ meetingId }: { meetingId: string }) {
     const fetchChat = async () => {
       const response = await fetch(`/api/meeting-chat/${meetingId}`);
       const data = await response.json();
-      if (data[0].messages && data[0].messages.length > 0) {
+      if (data.length && data[0].messages && data[0].messages.length > 0) {
         setMessages(data[0].messages.map((msg: any) => {
             if (!msg.parts && msg.content) {
                 msg.parts = msg.content
@@ -44,6 +45,7 @@ export default function Chat({ meetingId }: { meetingId: string }) {
   }, [meetingId]);
 
   const handleSendMessage = useCallback(async () => {
+    if (readOnly) return;
     if (!input.trim()) return;
     setIsWaiting(true);
     try {
@@ -59,6 +61,14 @@ export default function Chat({ meetingId }: { meetingId: string }) {
         }
       }
     );
+    fetch(`/api/events`, {
+        method: "POST",
+        body: JSON.stringify({
+          user_id: getCookie("prospectId"),
+          event_type: "track",
+          event_name: "message_sent"
+        })
+      })
     setInput('');
     } finally {
       setIsWaiting(false);
@@ -72,7 +82,7 @@ export default function Chat({ meetingId }: { meetingId: string }) {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        width: '100%'
+        width: '100%',
     }}>
         <Box
         sx={{
@@ -82,26 +92,46 @@ export default function Chat({ meetingId }: { meetingId: string }) {
             backgroundColor: 'black',
             justifyContent: 'center',
             width: '100%',
+            height: height || '90vh',
             px: '1rem'
 
         }}
         >
+            <Box sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '100%',
+                mb: 1,
+                height: '9%'
+            }}>
             <Typography variant="h6" component="h2" sx={{
                 fontSize: '1.5rem',
                 fontWeight: 'bold',
-                color: '#fff',
-                my: 2
+                color: '#fff'
             }}>
                 Prep AI Chat
             </Typography>
+            {!readOnly && (
+            <Typography variant="body1" component="p" sx={{
+                fontSize: '0.9rem',
+                color: '#a1a1a1',
+                fontStyle: 'italic'
+            }}>
+                Please note: This conversation will be used by our Sales Rep to prepare for the meeting.
+            </Typography>
+            )}
+            </Box>
+
             <Box sx={{
                 width: '100%',
                 background: 'linear-gradient(135deg, #111112 0%, #000 100%)',
                 boxShadow: '0 8px 32px 0 rgba(0,0,0,0.45)',
                 padding: '2.5rem 2rem',
                 gap: '1.5rem',
-                height: '60vh',
-                overflowY: 'auto',
+                height: readOnly ? '91%' : '84%',
+                overflowY: 'scroll',
                 scrollbarWidth: 'thin',
                 scrollbarColor: '#444 #232526',
                 border: '1.5px solid #333',
@@ -109,17 +139,50 @@ export default function Chat({ meetingId }: { meetingId: string }) {
                 position: 'relative',
                 pb: 0
             }}>
-                {messages.length === 0 ? (
-                    <Box sx={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                    }}>
-                        <Typography variant="h6">
-                            Start the chat
-                        </Typography>
-                    </Box>
+                {(messages.length === 0) ? (
+                        (!readOnly) ? (
+                            <Box sx={{
+                                display: 'flex',
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}>
+                                <Box sx={{width: '33%', p:2, mx:2, border: '1px solid #007AFF', borderRadius: '18px', cursor: 'pointer'}}
+                                onClick={() => {
+                                    setInput('How can Vercel help with my deployment process?');
+                                }}
+                                >
+                                    <Typography variant="h6" sx={{color: '#007AFF', fontWeight: '100', fontStyle: 'italic'}}>
+                                        How can Vercel help with my deployment process?
+                                    </Typography>
+                                </Box>
+                                <Box sx={{width: '33%', p:2, mx:2, border: '1px solid #007AFF', borderRadius: '18px', cursor: 'pointer'}}
+                                onClick={() => {
+                                    setInput('How can Vercel help me build my AI tools?');
+                                }}
+                                >
+                                    <Typography variant="h6" sx={{color: '#007AFF', fontWeight: '100', fontStyle: 'italic'}}>
+                                        How can Vercel help me build my AI tools?
+                                    </Typography>
+                                </Box>
+                                <Box sx={{width: '33%', p:2, mx:2, border: '1px solid #007AFF', borderRadius: '18px', cursor: 'pointer'}}
+                                onClick={() => {
+                                    setInput('How can v0 help me speed up my product development?');
+                                }}
+                                >
+                                    <Typography variant="h6" sx={{color: '#007AFF', fontWeight: '100', fontStyle: 'italic'}}>
+                                        How can v0 help me speed up my product development?
+                                    </Typography>
+                                </Box>
+                                
+                            </Box> 
+                        ) : (
+                            <Box>
+                                <Typography variant="h6" sx={{color: '#fff', fontWeight: '100', fontStyle: 'italic'}}>
+                                    The prospect has not sent any messages yet.
+                                </Typography>
+                            </Box>
+                        )
                 ) : (
                     <>
                     {messages.map((message, index) => (
@@ -351,49 +414,52 @@ export default function Chat({ meetingId }: { meetingId: string }) {
                 }}>               
                 </Box>
             </Box>
+            {!readOnly && (
             <TextField
-                    value={input}
-                    onChange={e => setInput(e.target.value)}
-                    placeholder="Ask me anything about Vercel..."
-                    InputProps={{
-                        endAdornment: (
-                            <InputAdornment position="end">
-                            <IconButton
-                                onClick={handleSendMessage}
-                                sx={{
-                                    color: '#38bdf8',
-                                    '&:hover': {
-                                    backgroundColor: 'rgba(56, 189, 248, 0.1)',
-                                    transform: 'scale(1.1)',
-                                    },
-                                    transition: 'all 0.2s ease-in-out',
-                                }}
-                                >
-                                <ArrowUpIcon />
-                                </IconButton>
-                            </InputAdornment>
-                        )
-                    }}
-                    sx={{
-                        bgcolor: '#0a0a0a',
-                        borderRadius: '22px',
-                        width: '100%',
-                        px: 2,
-                        py: 1.5,
-                        fontSize: '1.15rem',
-                        boxShadow: '0 2px 8px 0 rgba(44,83,100,0.10)',
-                        border: '1.5px solid #333',
-                        outline: 'none',
-                        m: 2,
-                        '& .MuiInputBase-input': {
-                            color: '#fff',
-                            padding: 0,
-                        },
-                        '& .MuiOutlinedInput-notchedOutline': {
-                            border: 'none',
-                        }
-                    }}
-                /> 
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                placeholder="Ask me anything about Vercel..."
+                InputProps={{
+                    endAdornment: (
+                        <InputAdornment position="end">
+                        <IconButton
+                            onClick={handleSendMessage}
+                            sx={{
+                                color: '#38bdf8',
+                                '&:hover': {
+                                backgroundColor: 'rgba(56, 189, 248, 0.1)',
+                                transform: 'scale(1.1)',
+                                },
+                                transition: 'all 0.2s ease-in-out',
+                            }}
+                            >
+                            <ArrowUpIcon />
+                            </IconButton>
+                        </InputAdornment>
+                    )
+                }}
+                sx={{
+                    bgcolor: '#0a0a0a',
+                    borderRadius: '22px',
+                    width: '100%',
+                    px: 2,
+                    py: 1.5,
+                    fontSize: '1.15rem',
+                    height: '7%',
+                    boxShadow: '0 2px 8px 0 rgba(44,83,100,0.10)',
+                    border: '1.5px solid #333',
+                    outline: 'none',
+                    m: 2,
+                    '& .MuiInputBase-input': {
+                        color: '#fff',
+                        padding: 0,
+                    },
+                    '& .MuiOutlinedInput-notchedOutline': {
+                        border: 'none',
+                    }
+                }}
+            /> 
+            )}
         </Box>        
     </Box>
 

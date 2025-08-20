@@ -3,12 +3,22 @@
 import type React from "react"
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { 
+  Card, 
+  CardContent, 
+  CardHeader, 
+  Typography, 
+  FormControl, 
+  InputLabel, 
+  Select, 
+  MenuItem, 
+  TextField,
+  Button,
+  Box,
+  IconButton,
+  Tooltip
+} from "@mui/material"
+import { Info as InfoIcon } from "@mui/icons-material"
 import { countries, productOptions } from "@/lib/countries"
 import { Loader2 } from "lucide-react"
 import { CalendarBooking } from "./calendar-booking"
@@ -24,39 +34,6 @@ export function SalesContactForm() {
   })
 
   const [showBooking, setShowBooking] = useState(false)
-
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault()
-  //   setIsSubmitting(true)
-
-  //   try {
-  //     const response = await fetch("/api/prospects", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({
-  //         email: formData.email,
-  //         country: formData.country,
-  //         product_interest: formData.productInterest,
-  //         message: formData.message,
-  //       }),
-  //     })
-
-  //     if (response.ok) {
-  //       const { prospectId } = await response.json()
-  //       upsertCookie("prospectId", prospectId)
-  //       router.push(`/booking?prospectId=${prospectId}`)
-  //     } else {
-  //       throw new Error("Failed to submit form")
-  //     }
-  //   } catch (error) {
-  //     console.error("Error submitting form:", error)
-  //     // TODO: Add proper error handling/toast
-  //   } finally {
-  //     setIsSubmitting(false)
-  //   }
-  // }
 
   const handleShowCalendar = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -80,8 +57,14 @@ export function SalesContactForm() {
         const { prospectId } = await response.json()
         setProspectId(prospectId)
         setShowBooking(true)
-        // upsertCookie("prospectId", prospectId)
-        // router.push(`/booking?prospectId=${prospectId}`)
+        fetch(`/api/events`, {
+          method: "POST",
+          body: JSON.stringify({
+            user_id: prospectId,
+            event_type: "track",
+            event_name: "sales_contact_form_submitted"
+          })
+        })
       } else {
         throw new Error("Failed to submit form")
       }
@@ -98,91 +81,203 @@ export function SalesContactForm() {
     {(showBooking && prospectId) ? (
       <CalendarBooking prospectId={prospectId} />
     ) : (
-    <Card>
-      <CardHeader>
-        <CardTitle>Contact Sales</CardTitle>
-        <CardDescription>Tell us about your needs and we'll connect you with the right person</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleShowCalendar} className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email Address</Label>
-            <Input
-              id="email"
+    <Card 
+      sx={{ 
+        backgroundColor: "black", 
+        color: "white",
+        maxWidth: 600,
+        mx: "auto",
+        p: 3
+      }}
+    >
+      <CardContent sx={{ pt: 0 }}>
+        <Box component="form" onSubmit={handleShowCalendar} sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+          
+          {/* Company Email */}
+          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+          <Typography variant="body1" sx={{ color: "white", mb:2 }}>
+            Company Email
+          </Typography>
+          <FormControl fullWidth>
+            <TextField
               type="email"
               required
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              placeholder="your.email@company.com"
+              placeholder="Email address"
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  color: "white",
+                  backgroundColor: "rgba(255, 255, 255, 0.05)",
+                  "& fieldset": {
+                    borderColor: "rgba(255, 255, 255, 0.2)",
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "rgba(255, 255, 255, 0.3)",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "white",
+                  },
+                },
+                "& .MuiInputBase-input::placeholder": {
+                  color: "rgba(255, 255, 255, 0.5)",
+                  opacity: 1,
+                },
+              }}
             />
-          </div>
+          </FormControl>
+          </Box>
 
-          <div className="space-y-2">
-            <Label htmlFor="country">Country</Label>
+
+          {/* Country */}
+          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+          <Typography variant="body1" sx={{ color: "white", mb:2 }}>
+            Country
+          </Typography>
+          <FormControl fullWidth>
+            <InputLabel sx={{ color: "#a1a1a1", "&.Mui-focused": {
+              color: "white"
+            } }} id="select-country">Select your country</InputLabel>
             <Select
               required
+              labelId="select-country"
+              label="Select your country"
               value={formData.country}
-              onValueChange={(value) => setFormData({ ...formData, country: value })}
+              onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+              sx={{
+                color: "white",
+                backgroundColor: "rgba(255, 255, 255, 0.05)",
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "rgba(255, 255, 255, 0.2)",
+                },
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "rgba(255, 255, 255, 0.3)",
+                },
+                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "white",
+                },
+                "& .MuiSelect-icon": {
+                  color: "white",
+                },
+              }}
             >
-              <SelectTrigger>
-                <SelectValue placeholder="Select your country" />
-              </SelectTrigger>
-              <SelectContent>
-                {countries.map((country) => (
-                  <SelectItem key={country.value} value={country.value}>
-                    {country.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
+              {countries.map((country) => (
+                <MenuItem key={country.value} value={country.value}>
+                  {country.label}
+                </MenuItem>
+              ))}
             </Select>
-          </div>
+          </FormControl>            
+          </Box>
 
-          <div className="space-y-2">
-            <Label htmlFor="product">Product Interest</Label>
-            <Select
-              required
-              value={formData.productInterest}
-              onValueChange={(value) => setFormData({ ...formData, productInterest: value })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="What are you interested in?" />
-              </SelectTrigger>
-              <SelectContent>
+
+          {/* Primary Product Interest */}
+          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+            <Typography variant="body1" sx={{ color: "white", mb:2 }}>Primary Product Interest</Typography>
+            <FormControl fullWidth>
+              <InputLabel sx={{ color: "#a1a1a1", "&.Mui-focused": {
+              color: "white"
+            } }} id="select-product-interest">Select a value</InputLabel>
+              <Select
+                required
+                labelId="select-product-interest"
+                label="Select a value"
+                value={formData.productInterest}
+                onChange={(e) => setFormData({ ...formData, productInterest: e.target.value })}
+                sx={{
+                  color: "white",
+                  backgroundColor: "rgba(255, 255, 255, 0.05)",
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "rgba(255, 255, 255, 0.2)",
+                  },
+                  "&:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "rgba(255, 255, 255, 0.3)",
+                  },
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "white",
+                  },
+                  "& .MuiSelect-icon": {
+                    color: "white",
+                  },
+                }}
+              >
                 {productOptions.map((product) => (
-                  <SelectItem key={product.value} value={product.value}>
+                  <MenuItem key={product.value} value={product.value}>
                     {product.label}
-                  </SelectItem>
+                  </MenuItem>
                 ))}
-              </SelectContent>
-            </Select>
-          </div>
+              </Select>
+            </FormControl>            
+          </Box>
 
-          <div className="space-y-2">
-            <Label htmlFor="message">Tell us about your project</Label>
-            <Textarea
-              id="message"
-              value={formData.message}
-              onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-              placeholder="Describe your project, team size, current challenges, or any specific questions you have..."
-              rows={4}
-            />
-          </div>
 
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
+          {/* How can we help? */}
+          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+            <Typography variant="body1" sx={{ color: "white", mb:2 }}>How can we help?</Typography>
+            <FormControl fullWidth>
+              <TextField
+                value={formData.message}
+                onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                placeholder="Your company needs..."
+                multiline
+                rows={4}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    color: "white",
+                    backgroundColor: "rgba(255, 255, 255, 0.05)",
+                    "& fieldset": {
+                      borderColor: "rgba(255, 255, 255, 0.2)",
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "rgba(255, 255, 255, 0.3)",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "white",
+                    },
+                  },
+                  "& .MuiInputBase-input::placeholder": {
+                    color: "rgba(255, 255, 255, 0.5)",
+                    opacity: 1,
+                  },
+                }}
+              />
+            </FormControl>            
+          </Box>
+
+
+          {/* Submit Button */}
+          <Button 
+            type="submit" 
+            variant="contained" 
+            fullWidth
+            disabled={isSubmitting}
+            sx={{
+              mt: 2,
+              py: 1.5,
+              backgroundColor: "#0070f3",
+              color: "white",
+              "&:hover": {
+                backgroundColor: "#0051cc",
+              },
+              "&:disabled": {
+                backgroundColor: "rgba(255, 255, 255, 0.1)",
+                color: "rgba(255, 255, 255, 0.5)",
+              },
+            }}
+          >
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Submitting...
               </>
             ) : (
-              "Continue to Booking"
+              "Talk to Vercel"
             )}
           </Button>
-        </form>
+        </Box>
       </CardContent>
     </Card>      
     )}
     </>
-
   )
 }

@@ -13,8 +13,12 @@ export async function POST(request: NextRequest) {
 
     const resourcesCompleted = prospectResources.rows[0].resources_completed || []
 
+    if (prospectResources.rows.length === 0) {
+      return NextResponse.json({ message: "Prospect not found" }, { status: 404 })
+    }
+
     if (resourcesCompleted.includes(resourceId)) {
-        return NextResponse.json({ message: "Resource already completed" }, { status: 200 })
+      return NextResponse.json({ message: "Resource already completed" }, { status: 200 })
     }
 
     resourcesCompleted.push(resourceId)

@@ -7,22 +7,33 @@ import { getDb } from "@/lib/db";
 import resources from "@/lib/resources.json"
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
-    const { id } = await params;
-    const prospectId = id;
+    try {
+        const { id } = await params;
+        const prospectId = id;
 
-    const db = getDb()
-    
-    const { enrichedData, formSubmission }: { enrichedData: any, formSubmission: any } = await request.json()
+        const db = getDb()
+        
+        const { enrichedData, formSubmission }: { enrichedData: any, formSubmission: any } = await request.json()
 
-    const result = await generateResources(formSubmission, enrichedData)
+        await db.query(`
+            UPDATE prospects
+            SET enrichment = $1
+            WHERE id = $2
+        `, [JSON.stringify(enrichedData, null, 2), prospectId])
 
-    await db.query(`
-        UPDATE prospects
-        SET ai_resources = $1
-        WHERE id = $2
-    `, [JSON.stringify(result, null, 2), prospectId])
+        const result = await generateResources(formSubmission, enrichedData)
 
-    return NextResponse.json(result)
+        await db.query(`
+            UPDATE prospects
+            SET ai_resources = $1
+            WHERE id = $2
+        `, [JSON.stringify(result, null, 2), prospectId])
+
+        return NextResponse.json(result)        
+    } catch (error) {
+        console.error(error)
+        return NextResponse.json({ error: "Failed to generate resources" }, { status: 500 })
+    }
 }
 
 const generateResources = async (formSubmission: any, enrichedData: any) => {

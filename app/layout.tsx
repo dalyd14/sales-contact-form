@@ -28,9 +28,9 @@ html {
 }
         `}</style>
       </head>
-      <body className="min-h-screen flex flex-col">
+      <body className="min-h-screen flex flex-col"  style={{ backgroundColor: "black" }} >
         <Navigation />
-        <main className="flex-1">{children}</main>
+        <main className="flex-1" style={{ backgroundColor: "black" }}>{children}</main>
         {/* <Footer /> */}
       </body>
     </html>
