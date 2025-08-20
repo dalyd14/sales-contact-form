@@ -27,12 +27,13 @@ export function getDb(): Queryable {
 
     // Simple adapter so the rest of your app uses db.query(text, params)
     db = {
-      async query(text: string) {
-        // For Neon, we need to use the raw query approach
-        // This bypasses the template literal requirement
-        const result = await sql.unsafe(text);
-        return { rows: result as unknown as any[] };
-      },
+      async query(text: string, params?: any[]) {
+        // neon client supports $1, $2 params as an array or template-tag style
+        // Use the array form for parity with `pg`
+        const result = await sql.query(text, params ?? []);
+        // result already in row objects
+        return { rows: result as any[] };
+      }
     };
   } else {
     // ---- Local Postgres path (pg + Pool) ----
