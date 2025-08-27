@@ -67,6 +67,9 @@ export async function GET(request: NextRequest) {
             p.country as prospect_country,
             p.product_interest,
             p.message as prospect_message,
+            p.ai_resources,
+            p.resources_completed,
+            p.enrichment,
             sr.name as sales_rep_name,
             sr.email as sales_rep_email
           FROM meetings m
@@ -87,6 +90,9 @@ export async function GET(request: NextRequest) {
           p.country as prospect_country,
           p.product_interest,
           p.message as prospect_message,
+          p.ai_resources,
+          p.resources_completed,
+          p.enrichment,
           sr.name as sales_rep_name,
           sr.email as sales_rep_email
         FROM meetings m
