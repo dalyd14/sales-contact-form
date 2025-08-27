@@ -287,7 +287,7 @@ export function AdminDashboard() {
         </Card>
       </div> */}
 
-      {/* Meetings List */}
+      {/* Future Meetings List */}
       <Card sx={{
         backgroundColor: "black",
         color: "white",
@@ -297,8 +297,8 @@ export function AdminDashboard() {
         avatar={<Calendar/>}
         title={<Typography variant="h6" component="h2" className="text-sm font-medium">
           {selectedRep === "all"
-            ? `All Meetings (${meetings.length})`
-            : `Meetings for ${salesReps.find((r) => r.id.toString() === selectedRep)?.name} (${meetings.length})`}
+            ? `All Future Meetings (${meetings.filter((m) => m.meeting_date >= new Date().toISOString()).length})`
+            : `Future Meetings for ${salesReps.find((r) => r.id.toString() === selectedRep)?.name} (${meetings.filter((m) => m.meeting_date >= new Date().toISOString()).length})`}
         </Typography>}
         sx={{
           display: "flex",
@@ -312,7 +312,7 @@ export function AdminDashboard() {
             backgroundColor: "black",
             color: "white"
           }}>
-            {meetings.length === 0 ? (
+            {meetings.filter((m) => m.meeting_date >= new Date().toISOString()).length === 0 ? (
               <Box>
                 <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <Typography variant="body2" component="p" className="text-sm text-muted-foreground text-center">
@@ -321,7 +321,104 @@ export function AdminDashboard() {
               </Box>
             ) : (
               <Box>
-                {meetings.map((meeting) => {
+                {meetings.filter((m) => m.meeting_date >= new Date().toISOString()).map((meeting) => {
+                  const { date, time } = formatMeetingDate(meeting.meeting_date)
+                  return (
+                    <Box key={meeting.id} sx={{
+                      border: "1px solid #a1a1a1",
+                      backgroundColor: "black",
+                      color: "white",
+                      borderRadius: "10px",
+                      p: 2,
+                      mb: 2
+                    }}>
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1 space-y-2">
+                          <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2">
+                              <Clock className="h-4 w-4 text-muted-foreground" />
+                              <span className="font-semibold">
+                                {date} at {time}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-start gap-1 text-sm text-muted-foreground">
+                            <div className="flex items-center gap-1">
+                              <Mail className="h-3 w-3" />
+                              {meeting.prospect_email}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <User className="h-3 w-3" />
+                              {meeting.sales_rep_name}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="text-xs capitalize" style={{border: "1px solid #a1a1a1"}}>
+                              {meeting.product_interest.replaceAll("_", " ")}
+                            </Badge>
+                            <div className="flex items-center gap-1">
+                              <Globe className="h-3 w-3" />
+                              {meeting.prospect_country}
+                            </div>
+                          </div>
+                        </div>
+                        <div>
+                          <Button variant="outlined" sx={{ 
+                        mb:1,
+                        backgroundColor: "black", 
+                        border: "1px solid #a1a1a1",
+                        color: "white", 
+                        '&:hover': {
+                          color: "#a1a1a1"
+                        }
+                      }} size="small" onClick={() => {setSelectedMeeting(meeting); selectViewMeeting(meeting.id.toString()); setOpenDialog(true)}}>
+                            View Details
+                          </Button>                        
+                        </div>
+                      </div>                      
+                      </Box>
+                  )
+                })}
+              </Box>
+            )}            
+          </CardContent>
+      </Card>
+
+      {/* Past Meetings List */}
+      <Card sx={{
+        backgroundColor: "black",
+        color: "white",
+        border: "1px solid #a1a1a1"
+      }}>
+        <CardHeader 
+        avatar={<Calendar/>}
+        title={<Typography variant="h6" component="h2" className="text-sm font-medium">
+          {selectedRep === "all"
+            ? `All Past Meetings (${meetings.filter((m) => m.meeting_date < new Date().toISOString()).length})`
+            : `Past Meetings for ${salesReps.find((r) => r.id.toString() === selectedRep)?.name} (${meetings.filter((m) => m.meeting_date < new Date().toISOString()).length})`}
+        </Typography>}
+        sx={{
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+          pb: 2
+        }}
+        />
+          <CardContent sx={{
+            backgroundColor: "black",
+            color: "white"
+          }}>
+            {meetings.filter((m) => m.meeting_date < new Date().toISOString()).length === 0 ? (
+              <Box>
+                <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <Typography variant="body2" component="p" className="text-sm text-muted-foreground text-center">
+                  No meetings found
+                </Typography>
+              </Box>
+            ) : (
+              <Box>
+                {meetings.filter((m) => m.meeting_date < new Date().toISOString()).map((meeting) => {
                   const { date, time } = formatMeetingDate(meeting.meeting_date)
                   return (
                     <Box key={meeting.id} sx={{

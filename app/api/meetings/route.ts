@@ -54,7 +54,6 @@ export async function GET(request: NextRequest) {
         JOIN prospects p ON m.prospect_id = p.id
         JOIN sales_reps sr ON m.sales_rep_id = sr.id
         WHERE m.sales_rep_id = $1
-        AND m.meeting_date >= NOW()
         ORDER BY m.meeting_date ASC
       `, [salesRepId])
     } else if (prospectId) {
@@ -76,7 +75,6 @@ export async function GET(request: NextRequest) {
           JOIN prospects p ON m.prospect_id = p.id
           JOIN sales_reps sr ON m.sales_rep_id = sr.id
           WHERE m.prospect_id = $1
-          AND m.meeting_date >= NOW()
           ORDER BY m.meeting_date DESC
           LIMIT 1
         `, [prospectId])
@@ -98,7 +96,6 @@ export async function GET(request: NextRequest) {
         FROM meetings m
         JOIN prospects p ON m.prospect_id = p.id
         JOIN sales_reps sr ON m.sales_rep_id = sr.id
-        WHERE m.meeting_date >= NOW()
         ORDER BY m.meeting_date ASC
       `,)
     }
